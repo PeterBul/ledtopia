@@ -32,6 +32,7 @@ const typeDefs = gql`
 
   input LightState {
     on: Boolean
+    brightness: Float
   }
 `;
 
@@ -41,8 +42,8 @@ const resolvers = {
   },
   Mutation: {
     setLightState: async (root, { ip, state }, ctx) => {
-      sockets[ip].send(state.on ? "1" : "0");
-      return { ip: "123" };
+      sockets[ip].send(state.brightness);
+      return { ip: ip };
     },
   },
 };
