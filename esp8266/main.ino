@@ -1,21 +1,32 @@
-#include <ESP8266WiFi.h>
-#include <WebSocketsServer.h>
-
-WiFiServer server(80);
-WebSocketsServer webSocket = WebSocketsServer(81);
-
-bool fade = false;
-int pin_led = 2;
-int brightness = 0; // how bright the LED is
-int fadeAmount = 5; // how many points to fade the LED by
+#include <ESP8266WiFi.h>           // ESP WiFi library
+#include <WebSocketsServer.h>      // WebSockets library
+#define FASTLED_ALLOW_INTERRUPTS 0 // Used for ESP8266.
+#include "FastLED.h"               // FastLED library.
 
 char ssid[] = "Get-2G-D3F386"; // use your own network ssid and password
 char pass[] = "ltz5mn2azy";
 
+WiFiServer server(80);
+WebSocketsServer webSocket = WebSocketsServer(81);
+
+#if FASTLED_VERSION < 3001000
+#error "Requires FastLED 3.1 or later; check github for latest code."
+#endif
+
+// Fixed definitions cannot change on the fly.
+#define LED_DT 4         // Serial data pin
+#define LED_CK 11        // Clock pin for WS2801 or APA102
+#define COLOR_ORDER GRB  // It's GRB for WS2812B and GBR for APA102
+#define LED_TYPE WS2812B // changed toB What kind of strip are you using (APA102, WS2801 or WS2812B)?
+#define NUM_LEDS 60      // Number of LED's
+
+// Initialize changeable global variables.
+uint8_t max_bright = 255; // Overall brightness definition. It can be changed on the fly.
+
+struct CRGB leds[NUM_LEDS]; // Initialize our LED array.
+
 void setup()
 {
-  pinMode(pin_led, OUTPUT);
-  digitalWrite(pin_led, LOW);
 
   Serial.begin(9600);
   Serial.println();
@@ -57,50 +68,17 @@ void setup()
 
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
-}
 
-void loop()
-{
-  webSocket.loop();
-  if (fade)
-  {
-    analogWrite(pin_led, brightness);
+  // LED setup
 
-    // change the brightness for next time through the loop:
-    brightness = brightness + fadeAmount;
+  LEDS.addLeds<LED_TYPE, LED_DT, COLOR_ORDER>(leds, NUM_LEDS); // For WS2812B
 
-    // reverse the direction of the fading at the ends of the fade:
-    if (brightness <= 0 || brightness >= 255)
-    {
-      fadeAmount = -fadeAmount;
-    }
-    // wait for 30 milliseconds to see the dimming effect
-    delay(30);
-  }
-  delay(5);
+  FastLED.setBrightness(max_bright);
+  FastLED.setMaxPowerInVoltsAndMilliamps(5, 1000); // FastLED power management set at 5V, 500mA
 }
 
 void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
 {
-  if (type == WStype_TEXT)
-  {
-    if (payload[0] == '0')
-    {
-      digitalWrite(pin_led, LOW);
-    }
-    if (payload[0] == 'F')
-    {
-      fade = true;
-    }
-    if (payload[0] == 'N')
-    {
-      fade = false;
-    }
-    else if (payload[0] == '1')
-    {
-      digitalWrite(pin_led, HIGH);
-    }
-  }
 
   else
   {
@@ -114,3 +92,25 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
     Serial.println();
   }
 }
+
+void loop()
+{
+  rainbow_wave(10, 10); // Speed, delta hue values.
+  FastLED.show();
+  delay(500);
+
+  rainbow_wave(10, 10); // Speed, delta hue values.
+  FastLED.show();
+  delay(500);
+
+} // loop()
+
+void rainbow_wave(uint8_t thisSpeed, uint8_t deltaHue)
+{ // The fill_rainbow call doesn't support brightness levels.
+
+  // uint8_t thisHue = beatsin8(thisSpeed,0,255);                // A simple rainbow wave.
+  uint8_t thisHue = beat8(thisSpeed, 255); // A simple rainbow march.
+
+  fill_rainbow(leds, NUM_LEDS, thisHue, deltaHue); // Use FastLED's fill_rainbow routine.
+
+} // rainbow_wave()
