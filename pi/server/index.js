@@ -8,13 +8,17 @@ const devices = await getLocalDevices();
 
 devices.forEach((device) => {
   const ws = new WebSocket("ws://" + device.ip + ":81/");
+  sockets = { ...sockets, [device.ip]: ws };
   ws.on("open", () => {
     console.log("Opened ws");
+  });
+  ws.on("close", function close() {
+    console.log("disconnected");
+    delete sockets[device.ip];
   });
   ws.on("error", function (err) {
     console.log("Ws error", err);
   });
-  sockets = { ...sockets, [device.ip]: ws };
 });
 
 const typeDefs = gql`
@@ -33,6 +37,14 @@ const typeDefs = gql`
   input LightState {
     on: Boolean
     brightness: Float
+    speed: Float
+    color: Color
+  }
+
+  input Color {
+    r: Float
+    g: Float
+    b: Float
   }
 `;
 
@@ -42,7 +54,11 @@ const resolvers = {
   },
   Mutation: {
     setLightState: async (root, { ip, state }, ctx) => {
-      sockets[ip].send(state.brightness);
+      if (!sockets[ip]) {
+        console.log("couldnt find open socket");
+        return;
+      }
+      sockets[ip].send(JSON.stringify({ ...state }));
       return { ip: ip };
     },
   },

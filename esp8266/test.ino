@@ -1,6 +1,8 @@
 #include <ESP8266WiFi.h>      // ESP WiFi library
 #include <WebSocketsServer.h> // WebSockets library
+#include <ArduinoJson.h>      // Handle JSON
 #include "FastLED.h"          // FastLED library.
+#include <ArduinoJson.h>
 
 #define FASTLED_ALLOW_INTERRUPTS 0 // Used for ESP8266.
 
@@ -24,10 +26,16 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 // Initialize changeable global variables.
 uint8_t max_bright = 255; // Overall brightness definition. It can be changed on the fly.
 
+uint8_t the_speed = 10;
+uint8_t color_r = 10;
+uint8_t color_g = 10;
+uint8_t color_b = 10;
+
 struct CRGB leds[NUM_LEDS]; // Initialize our LED array.
 
 void setup()
 {
+  Serial.begin(9600);
   Serial.println(ssid);
   WiFi.begin(ssid, pass);
 
@@ -40,16 +48,6 @@ void setup()
     count++;
   }
 
-  if (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.println("");
-    Serial.print("Failed to connect to ");
-    Serial.println(ssid);
-    while (1)
-      ;
-  }
-
-  // start a server
   server.begin();
   Serial.println("Server started");
 
@@ -64,28 +62,26 @@ void setup()
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 1000); // FastLED power management set at 5V, 500mA
 }
 
-void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
-{
-
-  else
-  {
-    Serial.print("WStype = ");
-    Serial.println(type);
-    Serial.print("WS payload = ");
-    for (int i = 0; i < length; i++)
-    {
-      Serial.print((char)payload[i]);
-    }
-    Serial.println();
-  }
-}
-
 void loop()
 {
-  rainbow_wave(10, 10); // Speed, delta hue values.
+  webSocket.loop();
+  fill_solid(leds, NUM_LEDS, CRGB(color_r, color_g, color_b));
   FastLED.show();
+}
 
-} // loop()
+void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
+{
+  if (type == WStype_TEXT)
+  {
+    String str = (char *)payload;
+    Serial.print(str);
+    DynamicJsonDocument state(200);
+    deserializeJson(state, str);
+    color_r = state["color"]["r"];
+    color_g = state["color"]["g"];
+    color_b = state["color"]["b"];
+  }
+}
 
 void rainbow_wave(uint8_t thisSpeed, uint8_t deltaHue)
 { // The fill_rainbow call doesn't support brightness levels.
@@ -94,5 +90,4 @@ void rainbow_wave(uint8_t thisSpeed, uint8_t deltaHue)
   uint8_t thisHue = beat8(thisSpeed, 255); // A simple rainbow march.
 
   fill_rainbow(leds, NUM_LEDS, thisHue, deltaHue); // Use FastLED's fill_rainbow routine.
-
-} // rainbow_wave()
+}

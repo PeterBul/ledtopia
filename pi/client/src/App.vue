@@ -15,13 +15,7 @@
         <core-text tag="h2">Device nr.{{i + 1}}</core-text>
         <core-box mt="lg">
           <core-label>Brightness: {{light.brightness}}</core-label>
-          <input
-            type="range"
-            @change="e => adjustBrightness(light, e.target.value)"
-            :value="light.brightness"
-            min="0"
-            max="255"
-          />
+          <input type="color" @input="e => changeColor(light, e.target.value)" />
         </core-box>
       </core-box>
     </core-container>
@@ -29,6 +23,7 @@
 </template>
 
 <script>
+import { hexToRgb } from "./utils";
 import { getData } from "./api/getData";
 
 const ALL_LIGHTS = /* GraphQL */ `
@@ -50,17 +45,12 @@ const SET_LIGHT_STATE = /* GraphQL */ `
 export default {
   name: "App",
   async mounted() {
-    //this.getDevices();
+    this.getDevices();
   },
   data() {
     return {
       isSearching: true,
-      lights: [
-        {
-          ip: "123",
-          brightness: 255,
-        },
-      ],
+      lights: [],
     };
   },
   methods: {
@@ -76,18 +66,21 @@ export default {
       }));
       this.isSearching = false;
     },
-    async adjustBrightness(light, value) {
+    async changeColor(light, value) {
+      const { r, g, b } = hexToRgb(value);
       await getData({
         query: SET_LIGHT_STATE,
         variables: {
           ip: light.ip,
           state: {
-            on: !light.on,
-            brightness: parseInt(value),
+            color: {
+              r: r,
+              g: g,
+              b: b,
+            },
           },
         },
       });
-      light.brightness = value;
     },
   },
 };
