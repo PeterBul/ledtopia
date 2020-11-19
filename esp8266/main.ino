@@ -87,7 +87,6 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
     if (payload[0] == '0')
     {
       digitalWrite(pin_led, LOW);
-      Serial.println("LED=off");
     }
     if (payload[0] == 'F')
     {
@@ -100,7 +99,6 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
     else if (payload[0] == '1')
     {
       digitalWrite(pin_led, HIGH);
-      Serial.println("LED=on");
     }
   }
 
