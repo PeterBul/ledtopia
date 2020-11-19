@@ -1,7 +1,8 @@
-#include <ESP8266WiFi.h>           // ESP WiFi library
-#include <WebSocketsServer.h>      // WebSockets library
+#include <ESP8266WiFi.h>      // ESP WiFi library
+#include <WebSocketsServer.h> // WebSockets library
+#include "FastLED.h"          // FastLED library.
+
 #define FASTLED_ALLOW_INTERRUPTS 0 // Used for ESP8266.
-#include "FastLED.h"               // FastLED library.
 
 char ssid[] = "Get-2G-D3F386"; // use your own network ssid and password
 char pass[] = "ltz5mn2azy";
