@@ -80,9 +80,9 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
     String str = (char *)payload;
     DynamicJsonDocument state(200);
     deserializeJson(state, str);
-    COLOR_H = state["color"]["h"];
-    COLOR_S = state["color"]["s"];
-    COLOR_V = state["color"]["v"];
+    COLOR_H = state["hue"];
+    COLOR_S = state["saturation"];
+    COLOR_V = state["brightness"];
   }
 }
 

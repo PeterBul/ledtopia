@@ -2,27 +2,27 @@
   <div id="app">
     <core-container center>
       <core-box v-if="isSearching">Looking for devices</core-box>
-      <core-box v-if="!isSearching && !lights.length">Couldn't find any devices</core-box>
+      <core-box v-if="!isSearching && !Object.keys(lights).length">Couldn't find any devices</core-box>
       <core-box
         depth="sm"
         radius="md"
         border="ui"
         p="lg"
-        :key="light.ip"
-        v-for="(light, i) in lights"
+        :key="ip"
+        v-for="(light, ip, i) in lights"
       >
-        <core-text tag="p" size="xs">{{ light.ip }}</core-text>
+        <core-text tag="p" size="xs">{{ ip }}</core-text>
         <core-text tag="h2">Device nr.{{i + 1}}</core-text>
         <core-box mt="lg">
           <core-label>Mode</core-label>
           <core-tabs
             class="tab-buttons"
-            :value="light.type"
-            @onChange="e => light.type = e.target.value"
+            :value="light.mode"
+            @change="e => setLightState(ip, { mode: e.target.value})"
           >
-            <core-tab value="RAINBOW">Rainbow</core-tab>
             <core-tab value="SIMPLE">Simple</core-tab>
             <core-tab value="PULSE">Pulse</core-tab>
+            <core-tab>Rainbow</core-tab>
           </core-tabs>
         </core-box>
         <core-box mt="lg">
@@ -31,9 +31,9 @@
             class="hue-range"
             type="range"
             min="0"
-            max="360"
-            :value="light.color.h"
-            @input="e => setHue(light, parseInt(e.target.value))"
+            max="255"
+            :value="light.hue"
+            @input="e => setLightState(ip, { hue: parseInt(e.target.value) })"
           />
         </core-box>
         <core-box mt="lg">
@@ -42,10 +42,10 @@
             class="saturation-range"
             type="range"
             min="0"
-            max="100"
-            :style="{ '--color': `${getHex(light.color.h, 255, 100)}`}"
-            :value="light.color.s"
-            @input="e => setSaturation(light, parseInt(e.target.value))"
+            max="255"
+            :style="{ '--color': `${getHex(light.hue, 100, 100)}`}"
+            :value="light.saturation"
+            @input="e => setLightState(ip, { saturation: parseInt(e.target.value) })"
           />
         </core-box>
         <core-box mt="lg">
@@ -55,19 +55,20 @@
             type="range"
             min="0"
             max="100"
-            :style="{ '--color': `${getHex(light.color.h, 255, 100)}`}"
-            :value="light.color.v"
-            @input="e => setBrightness(light, parseInt(e.target.value))"
+            :style="{ '--color': `${getHex(light.hue, 100, 100)}`}"
+            :value="light.brightness"
+            @input="e => setLightState(ip, { brightness: parseInt(e.target.value) })"
           />
         </core-box>
-
-        <core-box mt="lg">
-          <core-label>Color picker</core-label>
+        <core-box mt="lg" v-if="light.mode === 'PULSE'">
+          <core-label>Pulse speed</core-label>
           <input
-            class="color-picker"
-            type="color"
-            :value="getHex(light.color.h, light.color.s, light.color.v)"
-            @input="e => setColor(light, e.target.value)"
+            class="range"
+            type="range"
+            min="0"
+            max="10"
+            :value="100"
+            @input="e => setLightState(ip, { pulseSpeed: parseInt(e.target.value)})"
           />
         </core-box>
       </core-box>
@@ -76,6 +77,7 @@
 </template>
 
 <script>
+import { merge } from "lodash";
 import convertColor from "color-convert";
 import { getData } from "./api/getData";
 
@@ -96,25 +98,23 @@ const SET_LIGHT_STATE = /* GraphQL */ `
 `;
 
 const initialLightState = {
-  type: "SIMPLE",
+  mode: "SIMPLE",
   on: false,
+  hue: 0,
+  saturation: 255,
   brightness: 255,
-  color: {
-    h: 0,
-    s: 255,
-    v: 100,
-  },
+  pulseSpeed: 200,
 };
 
 export default {
   name: "App",
   async mounted() {
-    //this.getDevices();
+    this.getDevices();
   },
   data() {
     return {
       isSearching: true,
-      lights: [{ ...initialLightState }],
+      lights: {},
     };
   },
   methods: {
@@ -127,65 +127,23 @@ export default {
       const { allLights } = await getData({
         query: ALL_LIGHTS,
       });
-      this.lights = allLights.map((light) => ({
-        ...light,
-        ...initialLightState,
-      }));
+      this.lights = allLights.reduce((acc, light) => {
+        return {
+          ...acc,
+          [light.ip]: { ...initialLightState },
+        };
+      }, {});
       this.isSearching = false;
     },
-    setColor(light, value) {
-      const hsv = convertColor.hex.hsv(value);
-      light.color.h = hsv[0];
-      light.color.s = hsv[1];
-      light.color.v = hsv[2];
-      this.setLightState(light.ip, {
-        type: light.type,
-        color: {
-          h: hsv[0],
-          s: hsv[1],
-          v: hsv[2],
-        },
-      });
-    },
-    setSaturation(light, value) {
-      light.color.s = value;
-      this.setLightState(light.ip, {
-        type: light.type,
-        color: {
-          h: light.color.h,
-          s: value,
-          v: light.color.v,
-        },
-      });
-    },
-    setBrightness(light, value) {
-      light.color.v = value;
-      this.setLightState(light.ip, {
-        type: light.type,
-        color: {
-          h: light.color.h,
-          s: light.color.s,
-          v: value,
-        },
-      });
-    },
-    setHue(light, value) {
-      light.color.h = value;
-      this.setLightState(light.ip, {
-        type: light.type,
-        color: {
-          h: value,
-          s: light.color.s,
-          v: light.color.v,
-        },
-      });
-    },
     async setLightState(ip, state) {
+      const oldState = this.lights[ip];
+      const newState = merge(oldState, state);
+      this.lights[ip] = newState;
       await getData({
         query: SET_LIGHT_STATE,
         variables: {
           ip,
-          state,
+          state: newState,
         },
       });
     },

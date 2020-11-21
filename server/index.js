@@ -24,17 +24,13 @@ const typeDefs = gql`
   }
 
   input LightState {
-    type: StateTypes
+    mode: StateTypes
     on: Boolean
     speed: Float
+    hue: Float
     brightness: Float
-    color: Color
-  }
-
-  input Color {
-    h: Float
-    s: Float
-    v: Float
+    saturation: Float
+    pulseSpeed: Float
   }
 `;
 
