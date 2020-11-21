@@ -1,25 +1,8 @@
 import { ApolloServer, gql } from "apollo-server";
-import { getLocalDevices } from "./utils/index.js";
-import WebSocket from "ws";
+import { getLocalDevices, sockets, setupConnections } from "./utils/index.js";
 
-// Find all local devices and try to connect to them
-let sockets = {};
 const devices = await getLocalDevices();
-
-devices.forEach((device) => {
-  const ws = new WebSocket("ws://" + device.ip + ":81/");
-  sockets = { ...sockets, [device.ip]: ws };
-  ws.on("open", () => {
-    console.log("Opened ws");
-  });
-  ws.on("close", function close() {
-    console.log("disconnected");
-    delete sockets[device.ip];
-  });
-  ws.on("error", function (err) {
-    console.log("Ws error", err);
-  });
-});
+setupConnections(devices);
 
 const typeDefs = gql`
   type Query {
@@ -34,23 +17,34 @@ const typeDefs = gql`
     ip: String
   }
 
+  enum StateTypes {
+    RAINBOW
+    SIMPLE
+    PULSE
+  }
+
   input LightState {
+    type: StateTypes
     on: Boolean
-    brightness: Float
     speed: Float
+    brightness: Float
     color: Color
   }
 
   input Color {
-    r: Float
-    g: Float
-    b: Float
+    h: Float
+    s: Float
+    v: Float
   }
 `;
 
 const resolvers = {
   Query: {
-    allLights: async () => await getLocalDevices(),
+    allLights: async () => {
+      const devices = await getLocalDevices();
+      setupConnections(devices);
+      return devices;
+    },
   },
   Mutation: {
     setLightState: async (root, { ip, state }, ctx) => {
@@ -58,7 +52,11 @@ const resolvers = {
         console.log("couldnt find open socket");
         return;
       }
+
+      console.log(state);
+
       sockets[ip].send(JSON.stringify({ ...state }));
+
       return { ip: ip };
     },
   },
