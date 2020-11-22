@@ -1,6 +1,12 @@
 import { ApolloServer, gql } from "apollo-server";
 import { getLocalDevices, sockets, setupConnections } from "./utils/index.js";
 
+const modeMap = {
+  SIMPLE: 0,
+  PULSE: 1,
+  RAINBOW: 2,
+};
+
 const devices = await getLocalDevices();
 setupConnections(devices);
 
@@ -51,7 +57,13 @@ const resolvers = {
 
       console.log(state);
 
-      sockets[ip].send(JSON.stringify({ ...state }));
+      let mode = 0;
+
+      if (state.mode) {
+        mode = modeMap[state.mode];
+      }
+
+      sockets[ip].send(JSON.stringify({ ...state, mode }));
 
       return { ip: ip };
     },

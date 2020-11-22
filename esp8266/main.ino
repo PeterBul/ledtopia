@@ -26,7 +26,7 @@ uint8_t SPEED = 10;
 uint8_t COLOR_H = 40;
 uint8_t COLOR_S = 250;
 uint8_t COLOR_V = 100;
-char *TYPE = "PULSE";
+uint8_t LIGHT_MODE = 0;
 
 float PULSE_SPEED = 500;
 float MIN_PULSE_BRIGHT = 100;
@@ -51,7 +51,6 @@ void setup()
 
   server.begin();
   Serial.println("Server started");
-  Serial.println(TYPE);
 
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
@@ -67,9 +66,18 @@ void setup()
 void loop()
 {
   webSocket.loop();
-  if (TYPE == "PULSE")
+
+  switch (LIGHT_MODE)
   {
+  case 0:
+    fill_color();
+    break;
+  case 1:
     pulse_wave();
+    break;
+  case 2:
+    rainbow_wave(10, 10);
+    break;
   }
 }
 
@@ -80,6 +88,7 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
     String str = (char *)payload;
     DynamicJsonDocument state(200);
     deserializeJson(state, str);
+    LIGHT_MODE = state["mode"];
     COLOR_H = state["hue"];
     COLOR_S = state["saturation"];
     COLOR_V = state["brightness"];
@@ -88,16 +97,16 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
 
 void rainbow_wave(uint8_t thisSpeed, uint8_t deltaHue)
 { // The fill_rainbow call doesn't support brightness levels.
-
   // uint8_t thisHue = beatsin8(thisSpeed,0,255);                // A simple rainbow wave.
-  uint8_t thisHue = beat8(thisSpeed, 255); // A simple rainbow march.
-
+  uint8_t thisHue = beat8(thisSpeed, 255);         // A simple rainbow march.
   fill_rainbow(leds, NUM_LEDS, thisHue, deltaHue); // Use FastLED's fill_rainbow routine.
+  FastLED.show();
 }
 
 void fill_color()
 {
   fill_solid(leds, NUM_LEDS, CHSV(COLOR_H, COLOR_S, COLOR_V));
+  FastLED.show();
 }
 
 void pulse_wave()
