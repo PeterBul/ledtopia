@@ -6,6 +6,7 @@ export let sockets = {};
 export function setupConnections(devices) {
   sockets = {};
   devices.forEach((device) => {
+    console.log("trying to setup web sockets on ip:", device.ip);
     const ws = new WebSocket("ws://" + device.ip + ":81/");
     sockets[device.ip] = ws;
     ws.on("open", () => {

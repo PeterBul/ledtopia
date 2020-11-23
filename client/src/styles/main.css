@@ -1,3 +1,14 @@
+.device-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 800px) {
+  .device-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
 .range {
   --color: white;
   outline: 0;

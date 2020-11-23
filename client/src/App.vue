@@ -1,92 +1,96 @@
 <template>
   <div id="app">
-    <core-container center>
-      <core-box py="xl">
-        <core-box text-align="center" pb="xl">
-          <core-text>LEDTOPIA</core-text>
+    <core-container size="xl" center>
+      <core-box px="lg" py="xl">
+        <core-box pb="xl">
+          <core-text size="md">LEDTOPIA</core-text>
         </core-box>
         <core-box v-if="isSearching">Looking for devices</core-box>
         <core-box v-if="!isSearching && !Object.keys(lights).length">Couldn't find any devices</core-box>
-        <core-box
-          depth="sm"
-          radius="md"
-          border="ui"
-          p="lg"
-          :key="ip"
-          v-for="(light, ip, i) in lights"
-        >
-          <core-text tag="p" size="xs">{{ ip }}</core-text>
-          <core-text tag="h2">Device nr.{{i + 1}}</core-text>
-          <core-box mt="lg">
-            <core-label>Mode</core-label>
-            <core-tabs
-              class="tab-buttons"
-              :value="light.mode"
-              @change="e => setLightState(ip, { mode: e.target.value})"
-            >
-              <core-tab value="SIMPLE">Simple</core-tab>
-              <core-tab value="PULSE">Pulse</core-tab>
-              <core-tab value="RAINBOW">Rainbow</core-tab>
-            </core-tabs>
+        <div class="device-grid">
+          <core-box
+            depth="sm"
+            radius="md"
+            border="ui"
+            p="lg"
+            :key="ip"
+            v-for="(light, ip, i) in lights"
+          >
+            <core-text tag="p" size="xs">{{ ip }}</core-text>
+            <core-text tag="h2">Device nr.{{i + 1}}</core-text>
+            <core-box mt="lg">
+              <core-label>Mode</core-label>
+              <core-tabs
+                class="tab-buttons"
+                :value="light.mode"
+                @change="e => setLightState(ip, { mode: e.target.value})"
+              >
+                <core-tab value="SIMPLE">Simple</core-tab>
+                <core-tab value="PULSE">Pulse</core-tab>
+                <core-tab value="RAINBOW">Rainbow</core-tab>
+                <core-tab value="BOUNCE">Bounce</core-tab>
+              </core-tabs>
+            </core-box>
+            <core-box mt="lg" v-if="showHue(light.mode)">
+              <core-label>Hue</core-label>
+              <input
+                class="hue-range"
+                type="range"
+                min="0"
+                max="255"
+                :value="light.hue"
+                @input="e => setLightState(ip, { hue: parseInt(e.target.value) })"
+              />
+            </core-box>
+            <core-box mt="lg" v-if="showSaturation(light.mode)">
+              <core-label>Saturation</core-label>
+              <input
+                class="saturation-range"
+                type="range"
+                min="0"
+                max="255"
+                :style="{ '--color': `${getHex(light.hue, 100, 100)}`}"
+                :value="light.saturation"
+                @input="e => setLightState(ip, { saturation: parseInt(e.target.value) })"
+              />
+            </core-box>
+            <core-box mt="lg" v-if="showBrightness(light.mode)">
+              <core-label>Brightness</core-label>
+              <input
+                class="brightness-range"
+                type="range"
+                min="0"
+                max="100"
+                :style="{ '--color': `${getHex(light.hue, 100, 100)}`}"
+                :value="light.brightness"
+                @input="e => setLightState(ip, { brightness: parseInt(e.target.value) })"
+              />
+            </core-box>
+            <core-box mt="lg" v-if="light.mode === 'PULSE'">
+              <core-label>Pulse speed</core-label>
+              <input
+                class="range"
+                type="range"
+                :style="{ transform: 'rotate(180deg)'}"
+                min="10"
+                max="500"
+                :value="light.pulseSpeed"
+                @input="e => setLightState(ip, { pulseSpeed: parseInt(e.target.value)})"
+              />
+            </core-box>
+            <core-box mt="lg" v-if="light.mode === 'RAINBOW'">
+              <core-label>Rainbow speed</core-label>
+              <input
+                class="range"
+                type="range"
+                min="0"
+                max="255"
+                :value="light.rainbowSpeed"
+                @input="e => setLightState(ip, { rainbowSpeed: parseInt(e.target.value)})"
+              />
+            </core-box>
           </core-box>
-          <core-box mt="lg" v-if="light.mode !== 'RAINBOW'">
-            <core-label>Hue</core-label>
-            <input
-              class="hue-range"
-              type="range"
-              min="0"
-              max="255"
-              :value="light.hue"
-              @input="e => setLightState(ip, { hue: parseInt(e.target.value) })"
-            />
-          </core-box>
-          <core-box mt="lg" v-if="light.mode !== 'RAINBOW'">
-            <core-label>Saturation</core-label>
-            <input
-              class="saturation-range"
-              type="range"
-              min="0"
-              max="255"
-              :style="{ '--color': `${getHex(light.hue, 100, 100)}`}"
-              :value="light.saturation"
-              @input="e => setLightState(ip, { saturation: parseInt(e.target.value) })"
-            />
-          </core-box>
-          <core-box mt="lg" v-if="light.mode === 'SIMPLE'">
-            <core-label>Brightness</core-label>
-            <input
-              class="brightness-range"
-              type="range"
-              min="0"
-              max="100"
-              :style="{ '--color': `${getHex(light.hue, 100, 100)}`}"
-              :value="light.brightness"
-              @input="e => setLightState(ip, { brightness: parseInt(e.target.value) })"
-            />
-          </core-box>
-          <core-box mt="lg" v-if="light.mode === 'PULSE'">
-            <core-label>Pulse speed</core-label>
-            <input
-              class="range"
-              type="range"
-              min="0"
-              max="100"
-              :value="100"
-              @input="e => setLightState(ip, { pulseSpeed: parseInt(e.target.value)})"
-            />
-          </core-box>
-          <core-box mt="lg" v-if="light.mode === 'RAINBOW'">
-            <core-label>Rainbow speed</core-label>
-            <input
-              class="range"
-              type="range"
-              min="0"
-              max="100"
-              :value="100"
-              @input="e => setLightState(ip, { rainbowSpeed: parseInt(e.target.value)})"
-            />
-          </core-box>
-        </core-box>
+        </div>
       </core-box>
     </core-container>
   </div>
@@ -120,6 +124,7 @@ const initialLightState = {
   saturation: 255,
   brightness: 255,
   pulseSpeed: 200,
+  rainbowSpeed: 10,
 };
 
 export default {
@@ -134,6 +139,15 @@ export default {
     };
   },
   methods: {
+    showHue(mode) {
+      return mode === "SIMPLE" || mode === "PULSE";
+    },
+    showBrightness(mode) {
+      return mode === "SIMPLE" || mode === "PULSE";
+    },
+    showSaturation(mode) {
+      return mode === "SIMPLE" || mode === "PULSE";
+    },
     getHex(h, s, v) {
       const hex = convertColor.hsv.hex(h, s, v);
       return `#${hex}`;

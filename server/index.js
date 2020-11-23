@@ -5,6 +5,7 @@ const modeMap = {
   SIMPLE: 0,
   PULSE: 1,
   RAINBOW: 2,
+  BOUNCE: 3,
 };
 
 const devices = await getLocalDevices();
@@ -27,6 +28,7 @@ const typeDefs = gql`
     RAINBOW
     SIMPLE
     PULSE
+    BOUNCE
   }
 
   input LightState {
@@ -37,6 +39,7 @@ const typeDefs = gql`
     brightness: Float
     saturation: Float
     pulseSpeed: Float
+    rainbowSpeed: Float
   }
 `;
 
