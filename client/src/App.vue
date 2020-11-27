@@ -1,181 +1,182 @@
 <template>
   <div id="app">
-    <core-container size="xl" center>
+    <core-container size="sm" center>
       <core-box px="lg" py="xl">
         <core-box pb="xl">
           <core-text size="md">LEDTOPIA</core-text>
         </core-box>
-        <core-box v-if="isSearching">Looking for devices</core-box>
-        <core-box v-if="!isSearching && !Object.keys(lights).length">Couldn't find any devices</core-box>
+        <core-box pb="xl">
+          <core-flex align-items="center" justify-content="between">
+            <core-text size="xxl">My scene</core-text>
+            <core-toggle></core-toggle>
+          </core-flex>
+        </core-box>
+        <core-box v-if="!isSearching && !Object.keys(allLights).length">Couldn't find any devices</core-box>
         <div class="device-grid">
-          <core-box
-            depth="sm"
-            radius="md"
-            border="ui"
-            p="lg"
-            :key="ip"
-            v-for="(light, ip, i) in lights"
-          >
-            <core-text tag="p" size="xs">{{ ip }}</core-text>
-            <core-text tag="h2">Device nr.{{i + 1}}</core-text>
-            <core-box mt="lg">
-              <core-label>Mode</core-label>
-              <core-tabs
-                class="tab-buttons"
-                :value="light.mode"
-                @change="e => setLightState(ip, { mode: e.target.value})"
-              >
-                <core-tab value="SIMPLE">Simple</core-tab>
-                <core-tab value="PULSE">Pulse</core-tab>
-                <core-tab value="RAINBOW">Rainbow</core-tab>
-                <core-tab value="BOUNCE">Bounce</core-tab>
-              </core-tabs>
-            </core-box>
-            <core-box mt="lg" v-if="showHue(light.mode)">
-              <core-label>Hue</core-label>
-              <input
-                class="hue-range"
-                type="range"
-                min="0"
-                max="255"
-                :value="light.hue"
-                @input="e => setLightState(ip, { hue: parseInt(e.target.value) })"
-              />
-            </core-box>
-            <core-box mt="lg" v-if="showSaturation(light.mode)">
-              <core-label>Saturation</core-label>
-              <input
-                class="saturation-range"
-                type="range"
-                min="0"
-                max="255"
-                :style="{ '--color': `${getHex(light.hue, 100, 100)}`}"
-                :value="light.saturation"
-                @input="e => setLightState(ip, { saturation: parseInt(e.target.value) })"
-              />
-            </core-box>
-            <core-box mt="lg" v-if="showBrightness(light.mode)">
-              <core-label>Brightness</core-label>
-              <input
-                class="brightness-range"
-                type="range"
-                min="0"
-                max="100"
-                :style="{ '--color': `${getHex(light.hue, 100, 100)}`}"
-                :value="light.brightness"
-                @input="e => setLightState(ip, { brightness: parseInt(e.target.value) })"
-              />
-            </core-box>
-            <core-box mt="lg" v-if="light.mode === 'PULSE'">
-              <core-label>Pulse speed</core-label>
-              <input
-                class="range"
-                type="range"
-                :style="{ transform: 'rotate(180deg)'}"
-                min="10"
-                max="500"
-                :value="light.pulseSpeed"
-                @input="e => setLightState(ip, { pulseSpeed: parseInt(e.target.value)})"
-              />
-            </core-box>
-            <core-box mt="lg" v-if="light.mode === 'RAINBOW'">
-              <core-label>Rainbow speed</core-label>
-              <input
-                class="range"
-                type="range"
-                min="0"
-                max="255"
-                :value="light.rainbowSpeed"
-                @input="e => setLightState(ip, { rainbowSpeed: parseInt(e.target.value)})"
-              />
-            </core-box>
-          </core-box>
+          <div :key="light.id" v-for="light in allLights">
+            <light-card :light="light" :removeLight="removeLight" :updateLight="updateLight" />
+          </div>
+          <div>
+            <core-button full variant="primary" size="lg" @click="showAddLight = true">Add device</core-button>
+          </div>
         </div>
       </core-box>
+      <core-modal
+        heading="Devices"
+        @toggle="e => showAddLight = e.target.open"
+        :open="showAddLight"
+      >
+        <core-box my="lg" :key="device.ip" v-for="device in allDevices">
+          <core-button
+            :disabled="deviceIsTaken(device.ip)"
+            full
+            @click="handleAddDevice(device.ip)"
+          >
+            {{device.ip}}
+            {{ deviceIsTaken(device.ip) ? '(taken)' : '' }}
+          </core-button>
+        </core-box>
+      </core-modal>
     </core-container>
   </div>
 </template>
 
 <script>
-import { merge } from "lodash";
-import convertColor from "color-convert";
 import { getData } from "./api/getData";
+import LightCard from "./components/light-card";
+
+const ALL_DEVICES = /* GraphQL */ `
+  query {
+    allDevices {
+      ip
+    }
+  }
+`;
 
 const ALL_LIGHTS = /* GraphQL */ `
   query {
     allLights {
       ip
+      id
+      name
+      state {
+        mode
+        brightness
+        saturation
+        hue
+        pulseSpeed
+        rainbowSpeed
+      }
     }
   }
 `;
 
-const SET_LIGHT_STATE = /* GraphQL */ `
-  mutation SetLight($ip: String!, $state: LightState!) {
-    setLightState(ip: $ip, state: $state) {
+const UPDATE_LIGHT = /* GraphQL */ `
+  mutation UpdateLight($id: ID!, $input: UpdateLightInput!) {
+    updateLight(id: $id, input: $input) {
       ip
+      id
+      name
+      state {
+        mode
+        brightness
+        saturation
+        hue
+        pulseSpeed
+        rainbowSpeed
+      }
     }
   }
 `;
 
-const initialLightState = {
-  mode: "SIMPLE",
-  on: false,
-  hue: 0,
-  saturation: 255,
-  brightness: 255,
-  pulseSpeed: 200,
-  rainbowSpeed: 10,
-};
+const REMOVE_LIGHT = /* GraphQL */ `
+  mutation RemoveLight($id: ID!) {
+    removeLight(id: $id)
+  }
+`;
+
+const ADD_LIGHT = /* GraphQL */ `
+  mutation AddLight($ip: String!, $name: String) {
+    addLight(ip: $ip, name: $name) {
+      id
+    }
+  }
+`;
 
 export default {
   name: "App",
+  components: { LightCard },
   async mounted() {
-    this.getDevices();
+    this.getAllLights();
   },
   data() {
     return {
-      isSearching: true,
-      lights: {},
+      showAddLight: false,
+      isSearching: false,
+      allLights: [],
+      allDevices: [],
     };
   },
+  watch: {
+    showAddLight: function (show) {
+      if (show) {
+        this.getAllDevices();
+      }
+    },
+  },
   methods: {
-    showHue(mode) {
-      return mode === "SIMPLE" || mode === "PULSE";
+    deviceIsTaken(ip) {
+      return this.allLights.some((light) => light.ip === ip);
     },
-    showBrightness(mode) {
-      return mode === "SIMPLE" || mode === "PULSE";
+    async getAllDevices() {
+      const { allDevices } = await getData({
+        query: ALL_DEVICES,
+      });
+      this.allDevices = allDevices;
     },
-    showSaturation(mode) {
-      return mode === "SIMPLE" || mode === "PULSE";
-    },
-    getHex(h, s, v) {
-      const hex = convertColor.hsv.hex(h, s, v);
-      return `#${hex}`;
-    },
-    async getDevices() {
+    async getAllLights() {
       this.isSearching = true;
       const { allLights } = await getData({
         query: ALL_LIGHTS,
       });
-      this.lights = allLights.reduce((acc, light) => {
-        return {
-          ...acc,
-          [light.ip]: { ...initialLightState },
-        };
-      }, {});
+      this.allLights = allLights;
       this.isSearching = false;
     },
-    async setLightState(ip, state) {
-      const oldState = this.lights[ip];
-      const newState = merge(oldState, state);
-      this.lights[ip] = newState;
+    handleAddDevice(ip) {
+      const isTaken = this.deviceIsTaken(ip);
+      if (isTaken) return;
+      this.showAddLight = false;
+      this.addLight(ip);
+    },
+    async addLight(ip) {
       await getData({
-        query: SET_LIGHT_STATE,
+        query: ADD_LIGHT,
         variables: {
           ip,
-          state: newState,
         },
       });
+      this.getAllLights();
+    },
+    async removeLight(id) {
+      await getData({
+        query: REMOVE_LIGHT,
+        variables: {
+          id,
+        },
+      });
+      this.getAllLights();
+    },
+    async updateLight(id, input) {
+      const { updateLight } = await getData({
+        query: UPDATE_LIGHT,
+        variables: {
+          id,
+          input,
+        },
+      });
+      this.allLights = this.allLights.map((light) =>
+        light.id === id ? updateLight : light
+      );
     },
   },
 };

@@ -4,21 +4,26 @@ import WebSocket from "ws";
 export let sockets = {};
 
 export function setupConnections(devices) {
-  sockets = {};
   devices.forEach((device) => {
+    delete sockets[device.ip];
     console.log("trying to setup web sockets on ip:", device.ip);
     const ws = new WebSocket("ws://" + device.ip + ":81/");
-    sockets[device.ip] = ws;
+
     ws.on("open", () => {
-      console.log("Opened ws");
+      console.log("open");
     });
-    ws.on("close", function close() {
+
+    ws.on("close", () => {
       console.log("disconnected");
+      ws.terminate();
       delete sockets[device.ip];
     });
-    ws.on("error", function (err) {
+    ws.on("error", (err) => {
       console.log("Ws error", err);
+      ws.terminate();
       delete sockets[device.ip];
     });
+
+    sockets[device.ip] = ws;
   });
 }

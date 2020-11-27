@@ -1,12 +1,53 @@
+core-modal::part(modal) {
+  min-height: 100vh;
+  min-width: 100vw;
+}
+
+@media (min-width: 800px) {
+  core-modal::part(modal) {
+    min-height: 60vh;
+    min-width: 50vw;
+  }
+}
+
 .device-grid {
   display: grid;
+  grid-gap: var(--core-space-sm);
   grid-template-columns: 1fr;
 }
 
 @media (min-width: 800px) {
   .device-grid {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr;
   }
+}
+
+core-box[bg="ui-weaker"] {
+  background: var(--core-color-ui-weaker);
+}
+
+core-select::part(input-field) {
+  font-family: inherit;
+}
+
+.device {
+  background: var(--core-color-ui-weaker);
+  padding: var(--core-space-sm);
+  box-shadow: var(--core-depth-sm);
+  border-radius: var(--core-border-radius-md);
+  outline: 0;
+  -webkit-appearance: none;
+}
+
+.device summary {
+  outline: 0;
+  cursor: pointer;
+  position: relative;
+  -webkit-appearance: none;
+}
+
+.device summary::-webkit-details-marker {
+  display: none;
 }
 
 .range {
@@ -14,13 +55,17 @@
   outline: 0;
   -webkit-appearance: none;
   width: 100%;
-  height: 25px;
+  height: 20px;
   background: var(--core-color-ui);
+}
+
+input[type="range"] {
+  border-radius: var(--core-border-radius-default);
 }
 
 .range::-webkit-slider-thumb {
   width: 20px;
-  height: 36px;
+  height: 30px;
   background: #fcffff;
   border: none;
   box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.5);
@@ -38,13 +83,13 @@
   outline: 0;
   -webkit-appearance: none;
   width: 100%;
-  height: 25px;
+  height: 20px;
   background: linear-gradient(90deg, white, var(--color));
 }
 
 .saturation-range::-webkit-slider-thumb {
   width: 20px;
-  height: 36px;
+  height: 30px;
   background: #fcffff;
   border: none;
   box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.5);
@@ -62,13 +107,13 @@
   outline: 0;
   -webkit-appearance: none;
   width: 100%;
-  height: 25px;
+  height: 20px;
   background: linear-gradient(90deg, black, var(--color));
 }
 
 .brightness-range::-webkit-slider-thumb {
   width: 20px;
-  height: 36px;
+  height: 30px;
   background: #fcffff;
   border: none;
   box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.5);
@@ -85,7 +130,7 @@
   outline: 0;
   -webkit-appearance: none;
   width: 100%;
-  height: 25px;
+  height: 20px;
   background: linear-gradient(
     to right,
     hsl(0, 100%, 50%) 0%,
@@ -106,7 +151,7 @@
 
 .hue-range::-webkit-slider-thumb {
   width: 20px;
-  height: 36px;
+  height: 30px;
   background: #fcffff;
   border: none;
   box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.5);
@@ -138,8 +183,8 @@
 }
 
 .tab-buttons core-tab {
-  border: 2px solid var(--core-color-ui);
   margin: 0;
+  border: 0;
   background: var(--core-color-white);
 }
 .tab-buttons core-tab:not(:first-of-type) {
