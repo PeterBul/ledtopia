@@ -1,3 +1,30 @@
+select {
+  height: var(--core-element-height-default);
+  background: transparent;
+  border: 0;
+  padding: 0px var(--core-space-md);
+  padding-right: 60px;
+  color: var(--core-color-font-weak);
+  border-radius: var(--core-border-radius-default);
+  cursor: pointer;
+  background: var(--core-color-white);
+  outline: 0;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, gray 50%),
+    linear-gradient(135deg, gray 50%, transparent 50%),
+    linear-gradient(to right, var(--core-color-ui), var(--core-color-ui));
+  background-position: calc(100% - 20px) calc(1em + 8px),
+    calc(100% - 15px) calc(1em + 8px), calc(100% - 2.5em) 12px;
+  background-size: 5px 5px, 5px 5px, 1px 1.5em;
+  background-repeat: no-repeat;
+}
+
+select:hover {
+  color: var(--core-color-font);
+}
+
 core-modal::part(modal) {
   min-height: 100vh;
   min-width: 100vw;
@@ -7,6 +34,18 @@ core-modal::part(modal) {
   core-modal::part(modal) {
     min-height: 60vh;
     min-width: 50vw;
+  }
+}
+
+.loading-modal::part(modal) {
+  min-height: 100vh;
+  min-width: 100vw;
+}
+
+@media (min-width: 800px) {
+  .loading-modal::part(modal) {
+    min-height: 100vh;
+    min-width: 100vw;
   }
 }
 

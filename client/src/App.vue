@@ -11,10 +11,19 @@
             <core-toggle></core-toggle>
           </core-flex>
         </core-box>
-        <core-box v-if="!isSearching && !Object.keys(allLights).length">Couldn't find any devices</core-box>
+        <core-box py="lg" v-if="loadingLights">
+          <core-flex justify-content="center" align-items="center">
+            <spinner></spinner>
+          </core-flex>
+        </core-box>
         <div class="device-grid">
           <div :key="light.id" v-for="light in allLights">
-            <light-card :light="light" :removeLight="removeLight" :updateLight="updateLight" />
+            <light-card
+              :allDevices="allDevices"
+              :light="light"
+              :removeLight="removeLight"
+              :updateLight="updateLight"
+            />
           </div>
           <div>
             <core-button full variant="primary" size="lg" @click="showAddLight = true">Add device</core-button>
@@ -26,14 +35,19 @@
         @toggle="e => showAddLight = e.target.open"
         :open="showAddLight"
       >
-        <core-box my="lg" :key="device.ip" v-for="device in allDevices">
+        <core-box py="lg" v-if="loadingDevices">
+          <core-flex justify-content="center" align-items="center">
+            <spinner></spinner>
+          </core-flex>
+        </core-box>
+        <core-box my="lg" :key="device.mac" v-for="device in allDevices">
           <core-button
-            :disabled="deviceIsTaken(device.ip)"
+            :disabled="deviceIsTaken(device.mac)"
             full
-            @click="handleAddDevice(device.ip)"
+            @click="handleAddDevice(device.mac)"
           >
-            {{device.ip}}
-            {{ deviceIsTaken(device.ip) ? '(taken)' : '' }}
+            {{device.mac}}
+            {{ deviceIsTaken(device.mac) ? '(taken)' : '' }}
           </core-button>
         </core-box>
       </core-modal>
@@ -44,11 +58,14 @@
 <script>
 import { getData } from "./api/getData";
 import LightCard from "./components/light-card";
+import Spinner from "./components/spinner";
 
 const ALL_DEVICES = /* GraphQL */ `
   query {
     allDevices {
       ip
+      mac
+      isReachable
     }
   }
 `;
@@ -56,10 +73,15 @@ const ALL_DEVICES = /* GraphQL */ `
 const ALL_LIGHTS = /* GraphQL */ `
   query {
     allLights {
-      ip
       id
       name
+      device {
+        mac
+        ip
+        isReachable
+      }
       state {
+        on
         mode
         brightness
         saturation
@@ -74,10 +96,15 @@ const ALL_LIGHTS = /* GraphQL */ `
 const UPDATE_LIGHT = /* GraphQL */ `
   mutation UpdateLight($id: ID!, $input: UpdateLightInput!) {
     updateLight(id: $id, input: $input) {
-      ip
       id
       name
+      device {
+        mac
+        ip
+        isReachable
+      }
       state {
+        on
         mode
         brightness
         saturation
@@ -96,8 +123,8 @@ const REMOVE_LIGHT = /* GraphQL */ `
 `;
 
 const ADD_LIGHT = /* GraphQL */ `
-  mutation AddLight($ip: String!, $name: String) {
-    addLight(ip: $ip, name: $name) {
+  mutation AddLight($mac: String!, $name: String) {
+    addLight(mac: $mac, name: $name) {
       id
     }
   }
@@ -105,12 +132,15 @@ const ADD_LIGHT = /* GraphQL */ `
 
 export default {
   name: "App",
-  components: { LightCard },
+  components: { LightCard, Spinner },
   async mounted() {
+    this.getAllDevices();
     this.getAllLights();
   },
   data() {
     return {
+      loadingDevices: false,
+      loadingLights: false,
       showAddLight: false,
       isSearching: false,
       allLights: [],
@@ -125,34 +155,36 @@ export default {
     },
   },
   methods: {
-    deviceIsTaken(ip) {
-      return this.allLights.some((light) => light.ip === ip);
+    deviceIsTaken(mac) {
+      return this.allLights.some((light) => light.device?.mac === mac);
     },
     async getAllDevices() {
+      this.loadingDevices = true;
       const { allDevices } = await getData({
         query: ALL_DEVICES,
       });
       this.allDevices = allDevices;
+      this.loadingDevices = false;
     },
     async getAllLights() {
-      this.isSearching = true;
+      this.loadingLights = true;
       const { allLights } = await getData({
         query: ALL_LIGHTS,
       });
       this.allLights = allLights;
-      this.isSearching = false;
+      this.loadingLights = false;
     },
-    handleAddDevice(ip) {
-      const isTaken = this.deviceIsTaken(ip);
+    handleAddDevice(mac) {
+      const isTaken = this.deviceIsTaken(mac);
       if (isTaken) return;
       this.showAddLight = false;
-      this.addLight(ip);
+      this.addLight(mac);
     },
-    async addLight(ip) {
+    async addLight(mac) {
       await getData({
         query: ADD_LIGHT,
         variables: {
-          ip,
+          mac,
         },
       });
       this.getAllLights();

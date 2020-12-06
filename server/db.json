@@ -2,18 +2,19 @@
   "devices": [],
   "lights": [
     {
-      "id": "_xwso---_xwS7---_xwRc",
-      "ip": "192.168.0.19",
+      "id": "--------_------------",
+      "deviceId": "5C:CF:7F:BA:55:CE",
+      "name": "My light",
       "type": "LED_STRIP",
       "isReachable": true,
       "state": {
         "mode": "SIMPLE",
-        "on": false,
-        "hue": 0,
+        "on": true,
+        "hue": 198,
         "saturation": 255,
-        "brightness": 0,
-        "pulseSpeed": 440,
-        "rainbowSpeed": 95
+        "brightness": 52,
+        "pulseSpeed": 483,
+        "rainbowSpeed": 97
       }
     }
   ],

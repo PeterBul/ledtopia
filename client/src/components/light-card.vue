@@ -9,11 +9,22 @@
           <core-text size="lg">{{ light.name || "Device"}}</core-text>
         </core-flex>
         <core-flex align-items="center" justify-content="end">
-          <core-toggle @click="e => e.preventDefault()"></core-toggle>
+          <core-toggle
+            :checked="light.state.on"
+            @click.prevent
+            @change.prevent="e => updateLight(light.id, { state: { on: e.target.checked }})"
+          ></core-toggle>
           <core-button variant="transparent" squared rounded @click="handleRemoveLight">&#10005;</core-button>
         </core-flex>
       </core-flex>
     </summary>
+
+    <core-box mt="lg">
+      <core-label>Device</core-label>
+      <select :value="light.device.mac">
+        <option :key="i" :value="device.mac" v-for="(device, i) in allDevices">{{device.mac}}</option>
+      </select>
+    </core-box>
 
     <core-box mt="lg">
       <core-label>Mode</core-label>
@@ -95,6 +106,7 @@ import convertColor from "color-convert";
 
 export default {
   props: {
+    allDevices: Array,
     light: Object,
     updateLight: Function,
     removeLight: Function,

@@ -6,8 +6,8 @@
 
 #define FASTLED_ALLOW_INTERRUPTS 0 // Used for ESP8266.
 
-char ssid[] = "Get-2G-D3F386"; // use your own network ssid and password
-char pass[] = "ltz5mn2azy";
+char ssid[] = "Riksheim"; // use your own network ssid and password
+char pass[] = "Hope6013";
 
 WiFiServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -23,6 +23,8 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 #define GRAVITY -1 // Downward (negative) acceleration of gravity in m/s^2
 #define h0 1       // Starting height, in meters, of the ball (strip length)
 #define NUM_BALLS 6
+
+bool IS_ON = true;
 
 // Initialize changeable global variables.
 uint8_t MAX_BRIGHT = 255;
@@ -70,6 +72,7 @@ void setup()
 
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
+  webSocket.enableHeartbeat(3000, 3000, 2);
 
   // LED setup
 
@@ -92,6 +95,13 @@ void setup()
 void loop()
 {
   webSocket.loop();
+
+  if (!IS_ON)
+  {
+    FastLED.clear();
+    FastLED.show();
+    return;
+  }
 
   switch (LIGHT_MODE)
   {
@@ -117,6 +127,7 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
     String str = (char *)payload;
     DynamicJsonDocument state(200);
     deserializeJson(state, str);
+    IS_ON = state["on"];
     LIGHT_MODE = state["mode"];
     COLOR_H = state["hue"];
     COLOR_S = state["saturation"];

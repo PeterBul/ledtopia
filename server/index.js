@@ -1,18 +1,19 @@
-import { ApolloServer, gql } from "apollo-server";
-import { getLocalDevices, sockets, setupConnections } from "./utils/index.js";
+import { ApolloServer, gql, PubSub } from "apollo-server";
 import low from "lowdb";
 import nanoid from "nanoid";
 import FileSync from "lowdb/adapters/FileSync.js";
 
+import {
+  getLocalDevices,
+  allDevices,
+  initDevices,
+  sendState,
+} from "./utils/connections.js";
+
+initDevices();
+
 const adapter = new FileSync("db.json");
 const database = low(adapter);
-
-const modeMap = {
-  SIMPLE: 0,
-  PULSE: 1,
-  RAINBOW: 2,
-  BOUNCE: 3,
-};
 
 const initialLightState = {
   mode: "SIMPLE",
@@ -23,13 +24,6 @@ const initialLightState = {
   pulseSpeed: 200,
   rainbowSpeed: 10,
 };
-
-async function initSockets() {
-  const devices = await getLocalDevices();
-  setupConnections(devices);
-}
-
-initSockets();
 
 const typeDefs = gql`
   type Query {
@@ -43,7 +37,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    addLight(ip: String!, name: String): Light
+    addLight(mac: String!, name: String): Light
     removeLight(id: ID!): ID!
     updateLight(id: ID!, input: UpdateLightInput!): Light
   }
@@ -57,9 +51,8 @@ const typeDefs = gql`
 
   type Light {
     id: ID!
-    ip: String
     name: String
-    isReachable: Boolean
+    device: Device
     type: LightType
     state: LightState
   }
@@ -77,6 +70,8 @@ const typeDefs = gql`
 
   type Device {
     ip: String
+    mac: String
+    isReachable: Boolean
   }
 
   input AddLightInput {
@@ -122,9 +117,14 @@ const resolvers = {
       return db.get("lights").value();
     },
     allDevices: async () => {
-      const devices = await getLocalDevices();
-      setupConnections(devices);
-      return devices;
+      return allDevices;
+    },
+  },
+  Light: {
+    device: async ({ deviceId }) => {
+      const device = allDevices.find((device) => device.mac === deviceId);
+      if (!device) throw new Error("No device found");
+      return device;
     },
   },
   Mutation: {
@@ -134,25 +134,15 @@ const resolvers = {
         .get("lights")
         .push({
           id,
-          ip: args.ip,
-          name: args.name,
+          deviceId: args.mac,
+          name: args.name || "My light",
           type: "LED_STRIP",
           isReachable: true,
           state: { ...initialLightState },
         })
         .write().id;
 
-      if (sockets[args.ip]) {
-        sockets[args.ip].send(
-          JSON.stringify({
-            ...initialLightState,
-            mode: modeMap[initialLightState.mode],
-          })
-        );
-      } else {
-        initSockets();
-        console.log("couldnt find socket");
-      }
+      sendState(args.mac, initialLightState);
 
       return db.get("lights").find({ id }).value();
     },
@@ -172,14 +162,9 @@ const resolvers = {
         })
         .write();
 
-      if (sockets[light.ip]) {
-        sockets[light.ip].send(
-          JSON.stringify({ ...light.state, mode: modeMap[light.state.mode] })
-        );
-      } else {
-        initSockets();
-        console.log("couldnt find socket");
-      }
+      console.log(light.state);
+
+      sendState(light.deviceId, light.state);
 
       return light;
     },
@@ -189,6 +174,7 @@ const resolvers = {
 const server = new ApolloServer({
   context: {
     db: database,
+    pubSub: new PubSub(),
   },
   typeDefs,
   resolvers,
