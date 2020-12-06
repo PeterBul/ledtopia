@@ -48,7 +48,7 @@ wss.on("close", function close() {
 
 export async function sendState(id, state) {
   const device = allDevices.find((device) => device.id === id);
-  if (!device) console.log("no device");
+  if (!device) console.log("Could update device, as it seems to be offline");
   if (device && device.ws && device.ws.readyState === WebSocket.OPEN) {
     device.ws.send(
       JSON.stringify({

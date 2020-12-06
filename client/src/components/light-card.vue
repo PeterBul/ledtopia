@@ -21,9 +21,18 @@
 
     <core-box mt="lg">
       <core-label>Device</core-label>
-      <select :value="light.device ? light.device.id : 'none'" @change="handleSelectDevice">
+      <select
+        :value="light.device ? light.device.id : 'none'"
+        @focus="getDevices"
+        @change="handleSelectDevice"
+      >
         <option value="none">None</option>
-        <option :key="i" :value="device.id" v-for="(device, i) in allDevices">{{device.id}}</option>
+        <option
+          :disabled="deviceIsTaken(device)"
+          :key="i"
+          :value="device.id"
+          v-for="(device, i) in allDevices"
+        >{{device.id}} {{deviceIsTaken(device) ? "(taken)" : ""}}</option>
       </select>
     </core-box>
 
@@ -108,11 +117,18 @@ import convertColor from "color-convert";
 export default {
   props: {
     allDevices: Array,
+    getDevices: Function,
     light: Object,
     updateLight: Function,
     removeLight: Function,
   },
   methods: {
+    deviceIsTaken(device) {
+      if (this.light.device && this.light.device.id === device.id) {
+        return false;
+      }
+      if (device.isTaken) return true;
+    },
     handleSelectDevice(e) {
       if (e.target.value === "none") {
         this.updateLight(this.light.id, {

@@ -2,7 +2,23 @@
   "devices": [],
   "lights": [
     {
-      "id": "--------_------------",
+      "id": "kkkkv4kGeK9gkdDGaJdAh",
+      "deviceId": null,
+      "name": "My light",
+      "type": "LED_STRIP",
+      "isReachable": true,
+      "state": {
+        "mode": "SIMPLE",
+        "on": true,
+        "hue": 79,
+        "saturation": 255,
+        "brightness": 70,
+        "pulseSpeed": 200,
+        "rainbowSpeed": 10
+      }
+    },
+    {
+      "id": "jBIJG9Iijkkv4---_-_-v",
       "deviceId": "10.0.0.15",
       "name": "My light",
       "type": "LED_STRIP",
@@ -10,11 +26,11 @@
       "state": {
         "mode": "SIMPLE",
         "on": true,
-        "hue": 218,
+        "hue": 45,
         "saturation": 255,
-        "brightness": 36,
-        "pulseSpeed": 37,
-        "rainbowSpeed": 200
+        "brightness": 255,
+        "pulseSpeed": 200,
+        "rainbowSpeed": 10
       }
     }
   ],

@@ -19,38 +19,18 @@
         <div class="device-grid">
           <div :key="light.id" v-for="light in allLights">
             <light-card
-              :allDevices="allDevices"
+              :getDevices="getAllDevices"
+              :allDevices="deviceOptions"
               :light="light"
               :removeLight="removeLight"
               :updateLight="updateLight"
             />
           </div>
           <div>
-            <core-button full variant="primary" size="lg" @click="showAddLight = true">Add device</core-button>
+            <core-button full variant="primary" size="lg" @click="addLight">Add light</core-button>
           </div>
         </div>
       </core-box>
-      <core-modal
-        heading="Devices"
-        @toggle="e => showAddLight = e.target.open"
-        :open="showAddLight"
-      >
-        <core-box py="lg" v-if="loadingDevices">
-          <core-flex justify-content="center" align-items="center">
-            <spinner></spinner>
-          </core-flex>
-        </core-box>
-        <core-box my="lg" :key="device.id" v-for="device in allDevices">
-          <core-button
-            :disabled="deviceIsTaken(device.id)"
-            full
-            @click="handleAddDevice(device.id)"
-          >
-            {{device.id}}
-            {{ deviceIsTaken(device.id) ? '(taken)' : '' }}
-          </core-button>
-        </core-box>
-      </core-modal>
     </core-container>
   </div>
 </template>
@@ -135,24 +115,25 @@ export default {
     return {
       loadingDevices: false,
       loadingLights: false,
-      showAddLight: false,
       isSearching: false,
       allLights: [],
       allDevices: [],
     };
   },
-  watch: {
-    showAddLight: function (show) {
-      if (show) {
-        this.getAllDevices();
-      }
+  computed: {
+    deviceOptions() {
+      return this.allDevices.map((device) => ({
+        ...device,
+        isTaken: this.deviceIsTaken(device.id),
+      }));
     },
   },
   methods: {
-    deviceIsTaken(mac) {
-      return this.allLights.some((light) => light.device?.mac === mac);
+    deviceIsTaken(id) {
+      return this.allLights.some((light) => light.device?.id === id);
     },
     async getAllDevices() {
+      console.log("getting devices");
       try {
         this.loadingDevices = true;
         const { allDevices } = await getData({
@@ -173,18 +154,9 @@ export default {
       this.allLights = allLights;
       this.loadingLights = false;
     },
-    handleAddDevice(mac) {
-      const isTaken = this.deviceIsTaken(mac);
-      if (isTaken) return;
-      this.showAddLight = false;
-      this.addLight(mac);
-    },
-    async addLight(mac) {
+    async addLight() {
       await getData({
         query: ADD_LIGHT,
-        variables: {
-          mac,
-        },
       });
       this.getAllLights();
     },

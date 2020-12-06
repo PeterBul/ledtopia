@@ -143,6 +143,12 @@ const resolvers = {
       return db.get("lights").find({ id }).value();
     },
     removeLight: async (root, args, { db }) => {
+      const light = db.get("lights").find({ id: args.id }).value();
+
+      if (light.deviceId) {
+        sendState(light.deviceId, { on: false });
+      }
+
       db.get("lights").remove({ id: args.id }).write();
       return args.id;
     },
