@@ -14,7 +14,15 @@
             @click.prevent
             @change.prevent="e => updateLight(light.id, { state: { on: e.target.checked }})"
           ></core-toggle>
-          <core-button variant="transparent" squared rounded @click="handleRemoveLight">&#10005;</core-button>
+          <core-overlay position-x="right">
+            <core-button variant="transparent" @click.prevent slot="trigger" full tabindex="0">
+              <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+            </core-button>
+            <core-menu style="min-width: 150px" slot="content">
+              <core-menu-item @click.prevent="() => copyLight(light.state)">Copy</core-menu-item>
+              <core-menu-item @click="handleRemoveLight">Delete</core-menu-item>
+            </core-menu>
+          </core-overlay>
         </core-flex>
       </core-flex>
     </summary>
@@ -116,6 +124,7 @@ import convertColor from "color-convert";
 
 export default {
   props: {
+    copyLight: Function,
     allDevices: Array,
     getDevices: Function,
     light: Object,

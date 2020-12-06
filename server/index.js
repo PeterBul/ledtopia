@@ -25,9 +25,9 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    addLight(name: String, deviceId: ID): Light
+    addLight(input: LightInput): Light
     removeLight(id: ID!): ID!
-    updateLight(id: ID!, input: UpdateLightInput!): Light
+    updateLight(id: ID!, input: LightInput!): Light
   }
 
   type Scene {
@@ -63,14 +63,8 @@ const typeDefs = gql`
     isReachable: Boolean
   }
 
-  input AddLightInput {
-    ip: String
+  input LightInput {
     name: String
-  }
-
-  input UpdateLightInput {
-    name: String
-    mode: StateType
     deviceId: ID
     state: LightStateInput
   }
@@ -122,22 +116,20 @@ const resolvers = {
     },
   },
   Mutation: {
-    addLight: async (root, args, { db }) => {
-      const id = nanoid();
-      db
+    addLight: async (root, { input }, { db }) => {
+      const id = db
         .get("lights")
         .push({
-          id,
-          deviceId: args.deviceId,
-          name: args.name || "My light",
+          id: nanoid(10),
+          deviceId: input.deviceId || null,
+          name: input.name || "My light",
           type: "LED_STRIP",
-          isReachable: true,
-          state: { ...initialLightState },
+          state: { ...initialLightState, ...input.state },
         })
         .write().id;
 
-      if (args.deviceId) {
-        sendState(args.deviceId, initialLightState);
+      if (id) {
+        sendState(id, { ...initialLightState, ...input.state });
       }
 
       return db.get("lights").find({ id }).value();

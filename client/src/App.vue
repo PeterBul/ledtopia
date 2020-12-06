@@ -19,6 +19,7 @@
         <div class="device-grid">
           <div :key="light.id" v-for="light in allLights">
             <light-card
+              :copyLight="copyLight"
               :getDevices="getAllDevices"
               :allDevices="deviceOptions"
               :light="light"
@@ -27,7 +28,7 @@
             />
           </div>
           <div>
-            <core-button full variant="primary" size="lg" @click="addLight">Add light</core-button>
+            <core-button full variant="primary" size="lg" @click="() => addLight()">Add light</core-button>
           </div>
         </div>
       </core-box>
@@ -70,7 +71,7 @@ const ALL_LIGHTS = /* GraphQL */ `
 `;
 
 const UPDATE_LIGHT = /* GraphQL */ `
-  mutation UpdateLight($id: ID!, $input: UpdateLightInput!) {
+  mutation UpdateLight($id: ID!, $input: LightInput!) {
     updateLight(id: $id, input: $input) {
       id
       name
@@ -97,8 +98,8 @@ const REMOVE_LIGHT = /* GraphQL */ `
 `;
 
 const ADD_LIGHT = /* GraphQL */ `
-  mutation AddLight($deviceId: ID, $name: String) {
-    addLight(deviceId: $deviceId, name: $name) {
+  mutation AddLight($input: LightInput) {
+    addLight(input: $input) {
       id
     }
   }
@@ -132,6 +133,9 @@ export default {
     deviceIsTaken(id) {
       return this.allLights.some((light) => light.device?.id === id);
     },
+    copyLight(state) {
+      this.addLight({ state });
+    },
     async getAllDevices() {
       console.log("getting devices");
       try {
@@ -154,9 +158,12 @@ export default {
       this.allLights = allLights;
       this.loadingLights = false;
     },
-    async addLight() {
+    async addLight(input = {}) {
       await getData({
         query: ADD_LIGHT,
+        variables: {
+          input,
+        },
       });
       this.getAllLights();
     },
