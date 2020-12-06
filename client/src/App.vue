@@ -40,14 +40,14 @@
             <spinner></spinner>
           </core-flex>
         </core-box>
-        <core-box my="lg" :key="device.mac" v-for="device in allDevices">
+        <core-box my="lg" :key="device.id" v-for="device in allDevices">
           <core-button
-            :disabled="deviceIsTaken(device.mac)"
+            :disabled="deviceIsTaken(device.id)"
             full
-            @click="handleAddDevice(device.mac)"
+            @click="handleAddDevice(device.id)"
           >
-            {{device.mac}}
-            {{ deviceIsTaken(device.mac) ? '(taken)' : '' }}
+            {{device.id}}
+            {{ deviceIsTaken(device.id) ? '(taken)' : '' }}
           </core-button>
         </core-box>
       </core-modal>
@@ -63,9 +63,7 @@ import Spinner from "./components/spinner";
 const ALL_DEVICES = /* GraphQL */ `
   query {
     allDevices {
-      ip
-      mac
-      isReachable
+      id
     }
   }
 `;
@@ -76,9 +74,7 @@ const ALL_LIGHTS = /* GraphQL */ `
       id
       name
       device {
-        mac
-        ip
-        isReachable
+        id
       }
       state {
         on
@@ -99,9 +95,7 @@ const UPDATE_LIGHT = /* GraphQL */ `
       id
       name
       device {
-        mac
-        ip
-        isReachable
+        id
       }
       state {
         on
@@ -123,8 +117,8 @@ const REMOVE_LIGHT = /* GraphQL */ `
 `;
 
 const ADD_LIGHT = /* GraphQL */ `
-  mutation AddLight($mac: String!, $name: String) {
-    addLight(mac: $mac, name: $name) {
+  mutation AddLight($deviceId: ID, $name: String) {
+    addLight(deviceId: $deviceId, name: $name) {
       id
     }
   }
@@ -159,12 +153,17 @@ export default {
       return this.allLights.some((light) => light.device?.mac === mac);
     },
     async getAllDevices() {
-      this.loadingDevices = true;
-      const { allDevices } = await getData({
-        query: ALL_DEVICES,
-      });
-      this.allDevices = allDevices;
-      this.loadingDevices = false;
+      try {
+        this.loadingDevices = true;
+        const { allDevices } = await getData({
+          query: ALL_DEVICES,
+        });
+        this.allDevices = allDevices;
+      } catch (e) {
+        console.log(e);
+      } finally {
+        this.loadingDevices = false;
+      }
     },
     async getAllLights() {
       this.loadingLights = true;

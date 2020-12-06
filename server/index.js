@@ -1,19 +1,7 @@
 import { ApolloServer, gql, PubSub } from "apollo-server";
-import low from "lowdb";
+import { database } from "./utils/db.js";
+import { sendState, allDevices } from "./utils/devices.js";
 import nanoid from "nanoid";
-import FileSync from "lowdb/adapters/FileSync.js";
-
-import {
-  getLocalDevices,
-  allDevices,
-  initDevices,
-  sendState,
-} from "./utils/connections.js";
-
-initDevices();
-
-const adapter = new FileSync("db.json");
-const database = low(adapter);
 
 const initialLightState = {
   mode: "SIMPLE",
@@ -37,7 +25,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    addLight(mac: String!, name: String): Light
+    addLight(name: String, deviceId: ID): Light
     removeLight(id: ID!): ID!
     updateLight(id: ID!, input: UpdateLightInput!): Light
   }
@@ -69,6 +57,7 @@ const typeDefs = gql`
   }
 
   type Device {
+    id: String
     ip: String
     mac: String
     isReachable: Boolean
@@ -82,6 +71,7 @@ const typeDefs = gql`
   input UpdateLightInput {
     name: String
     mode: StateType
+    deviceId: ID
     state: LightStateInput
   }
 
@@ -122,9 +112,13 @@ const resolvers = {
   },
   Light: {
     device: async ({ deviceId }) => {
-      const device = allDevices.find((device) => device.mac === deviceId);
-      if (!device) throw new Error("No device found");
-      return device;
+      const device = allDevices.find((device) => device.id === deviceId);
+      if (!device) {
+        console.log("No device found");
+        return null;
+      } else {
+        return device;
+      }
     },
   },
   Mutation: {
@@ -134,7 +128,7 @@ const resolvers = {
         .get("lights")
         .push({
           id,
-          deviceId: args.mac,
+          deviceId: args.deviceId,
           name: args.name || "My light",
           type: "LED_STRIP",
           isReachable: true,
@@ -142,7 +136,9 @@ const resolvers = {
         })
         .write().id;
 
-      sendState(args.mac, initialLightState);
+      if (args.deviceId) {
+        sendState(args.deviceId, initialLightState);
+      }
 
       return db.get("lights").find({ id }).value();
     },
@@ -151,7 +147,7 @@ const resolvers = {
       return args.id;
     },
     updateLight: async (root, { id, input }, { db }) => {
-      const oldLight = db.get("lights").find({ id }).value();
+      const oldLight = { ...db.get("lights").find({ id }).value() };
       const light = db
         .get("lights")
         .find({ id })
@@ -162,9 +158,13 @@ const resolvers = {
         })
         .write();
 
-      console.log(light.state);
+      console.log(input);
 
-      sendState(light.deviceId, light.state);
+      if (input.deviceId === null) {
+        sendState(oldLight.deviceId, { on: false });
+      } else if (light.deviceId) {
+        sendState(light.deviceId, light.state);
+      }
 
       return light;
     },

@@ -1,5 +1,5 @@
 #include <ESP8266WiFi.h>      // ESP WiFi library
-#include <WebSocketsServer.h> // WebSockets library
+#include <WebSocketsClient.h> // WebSockets library
 #include <ArduinoJson.h>      // Handle JSON
 #include "FastLED.h"          // FastLED library.
 #include <ArduinoJson.h>
@@ -10,7 +10,7 @@ char ssid[] = "Riksheim"; // use your own network ssid and password
 char pass[] = "Hope6013";
 
 WiFiServer server(80);
-WebSocketsServer webSocket = WebSocketsServer(81);
+WebSocketsClient webSocket;
 
 // Fixed definitions cannot change on the fly.
 #define LED_DT 4         // Serial data pin
@@ -70,8 +70,9 @@ void setup()
   server.begin();
   Serial.println("Server started");
 
-  webSocket.begin();
+  webSocket.begin("10.0.0.14", 81, "/");
   webSocket.onEvent(webSocketEvent);
+  webSocket.setReconnectInterval(5000);
   webSocket.enableHeartbeat(3000, 3000, 2);
 
   // LED setup
@@ -120,7 +121,7 @@ void loop()
   }
 }
 
-void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
+void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 {
   if (type == WStype_TEXT)
   {

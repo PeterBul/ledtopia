@@ -21,8 +21,9 @@
 
     <core-box mt="lg">
       <core-label>Device</core-label>
-      <select :value="light.device.mac">
-        <option :key="i" :value="device.mac" v-for="(device, i) in allDevices">{{device.mac}}</option>
+      <select :value="light.device ? light.device.id : 'none'" @change="handleSelectDevice">
+        <option value="none">None</option>
+        <option :key="i" :value="device.id" v-for="(device, i) in allDevices">{{device.id}}</option>
       </select>
     </core-box>
 
@@ -112,6 +113,15 @@ export default {
     removeLight: Function,
   },
   methods: {
+    handleSelectDevice(e) {
+      if (e.target.value === "none") {
+        this.updateLight(this.light.id, {
+          deviceId: null,
+        });
+      } else {
+        this.updateLight(this.light.id, { deviceId: e.target.value });
+      }
+    },
     handleRemoveLight(e) {
       e.preventDefault();
       this.removeLight(this.light.id);

@@ -3,18 +3,18 @@
   "lights": [
     {
       "id": "--------_------------",
-      "deviceId": "5C:CF:7F:BA:55:CE",
+      "deviceId": "10.0.0.15",
       "name": "My light",
       "type": "LED_STRIP",
       "isReachable": true,
       "state": {
         "mode": "SIMPLE",
         "on": true,
-        "hue": 181,
+        "hue": 218,
         "saturation": 255,
-        "brightness": 52,
-        "pulseSpeed": 483,
-        "rainbowSpeed": 97
+        "brightness": 36,
+        "pulseSpeed": 37,
+        "rainbowSpeed": 200
       }
     }
   ],
