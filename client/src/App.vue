@@ -37,84 +37,51 @@
 </template>
 
 <script>
-import { getData } from "./api/getData";
+import {
+  ALL_DEVICES,
+  ALL_LIGHTS,
+  LIGHT_ADDED,
+  UPDATE_LIGHT,
+  REMOVE_LIGHT,
+  ADD_LIGHT,
+  LIGHT_UPDATED,
+  LIGHT_REMOVED,
+} from "./api/queries";
+import { getData, subscribeData } from "./api/getData";
 import LightCard from "./components/light-card";
 import Spinner from "./components/spinner";
-
-const ALL_DEVICES = /* GraphQL */ `
-  query {
-    allDevices {
-      id
-    }
-  }
-`;
-
-const ALL_LIGHTS = /* GraphQL */ `
-  query {
-    allLights {
-      id
-      name
-      device {
-        id
-      }
-      state {
-        on
-        mode
-        brightness
-        saturation
-        hue
-        pulseSpeed
-        rainbowSpeed
-      }
-    }
-  }
-`;
-
-const UPDATE_LIGHT = /* GraphQL */ `
-  mutation UpdateLight($id: ID!, $input: LightInput!) {
-    updateLight(id: $id, input: $input) {
-      id
-      name
-      device {
-        id
-      }
-      state {
-        on
-        mode
-        brightness
-        saturation
-        hue
-        pulseSpeed
-        rainbowSpeed
-      }
-    }
-  }
-`;
-
-const REMOVE_LIGHT = /* GraphQL */ `
-  mutation RemoveLight($id: ID!) {
-    removeLight(id: $id)
-  }
-`;
-
-const ADD_LIGHT = /* GraphQL */ `
-  mutation AddLight($input: LightInput) {
-    addLight(input: $input) {
-      id
-    }
-  }
-`;
 
 export default {
   name: "App",
   components: { LightCard, Spinner },
   async mounted() {
+    subscribeData({ query: LIGHT_ADDED }, ({ lightAdded }) => {
+      if (lightAdded) {
+        this.allLights.push(lightAdded);
+      }
+    });
+
+    subscribeData({ query: LIGHT_UPDATED }, ({ lightUpdated }) => {
+      if (lightUpdated) {
+        this.allLights = this.allLights.map((light) =>
+          lightUpdated.id === light.id ? lightUpdated : light
+        );
+      }
+    });
+
+    subscribeData({ query: LIGHT_REMOVED }, ({ lightRemoved }) => {
+      if (lightRemoved) {
+        this.allLights = this.allLights.filter(
+          (light) => lightRemoved !== light.id
+        );
+      }
+    });
+
     this.getAllDevices();
     this.getAllLights();
   },
   data() {
     return {
-      loadingDevices: false,
       loadingLights: false,
       isSearching: false,
       allLights: [],
@@ -137,18 +104,10 @@ export default {
       this.addLight({ state });
     },
     async getAllDevices() {
-      console.log("getting devices");
-      try {
-        this.loadingDevices = true;
-        const { allDevices } = await getData({
-          query: ALL_DEVICES,
-        });
-        this.allDevices = allDevices;
-      } catch (e) {
-        console.log(e);
-      } finally {
-        this.loadingDevices = false;
-      }
+      const { allDevices } = await getData({
+        query: ALL_DEVICES,
+      });
+      this.allDevices = allDevices;
     },
     async getAllLights() {
       this.loadingLights = true;
@@ -165,7 +124,6 @@ export default {
           input,
         },
       });
-      this.getAllLights();
     },
     async removeLight(id) {
       await getData({
@@ -174,19 +132,15 @@ export default {
           id,
         },
       });
-      this.getAllLights();
     },
     async updateLight(id, input) {
-      const { updateLight } = await getData({
+      await getData({
         query: UPDATE_LIGHT,
         variables: {
           id,
           input,
         },
       });
-      this.allLights = this.allLights.map((light) =>
-        light.id === id ? updateLight : light
-      );
     },
   },
 };

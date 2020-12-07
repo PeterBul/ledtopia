@@ -30,7 +30,7 @@
     <core-box mt="lg">
       <core-label>Device</core-label>
       <select
-        :value="light.device ? light.device.id : 'none'"
+        :value="light.device ? light.device && light.device.id : 'none'"
         @focus="getDevices"
         @change="handleSelectDevice"
       >

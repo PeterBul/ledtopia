@@ -3,6 +3,10 @@ import { database } from "./utils/db.js";
 import { sendState, allDevices } from "./utils/devices.js";
 import nanoid from "nanoid";
 
+const LIGHT_ADDED = "LIGHT_ADDED";
+const LIGHT_REMOVED = "LIGHT_REMOVED";
+const LIGHT_UPDATED = "LIGHT_UPDATED";
+
 const initialLightState = {
   mode: "SIMPLE",
   on: false,
@@ -14,6 +18,12 @@ const initialLightState = {
 };
 
 const typeDefs = gql`
+  type Subscription {
+    lightAdded: Light
+    lightRemoved: ID
+    lightUpdated: Light
+  }
+
   type Query {
     allScenes: [Scene]
     scene(id: String): Scene
@@ -93,6 +103,20 @@ const typeDefs = gql`
 `;
 
 const resolvers = {
+  Subscription: {
+    lightAdded: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([LIGHT_ADDED]),
+    },
+    lightUpdated: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([LIGHT_UPDATED]),
+    },
+    lightRemoved: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([LIGHT_REMOVED]),
+    },
+  },
   Query: {
     light: async (root, args, { db }) => {
       return db.get("lights").find({ id: args.id }).value();
@@ -116,35 +140,42 @@ const resolvers = {
     },
   },
   Mutation: {
-    addLight: async (root, { input }, { db }) => {
-      const id = db
-        .get("lights")
+    addLight: async (root, { input }, { db, pubsub }) => {
+      const id = nanoid(10);
+
+      db.get("lights")
         .push({
-          id: nanoid(10),
+          id: id,
           deviceId: input.deviceId || null,
           name: input.name || "My light",
           type: "LED_STRIP",
           state: { ...initialLightState, ...input.state },
         })
-        .write().id;
+        .write();
 
       if (id) {
         sendState(id, { ...initialLightState, ...input.state });
       }
 
-      return db.get("lights").find({ id }).value();
+      const light = db.get("lights").find({ id }).value();
+
+      pubsub.publish(LIGHT_ADDED, { lightAdded: light });
+
+      return light;
     },
-    removeLight: async (root, args, { db }) => {
+    removeLight: async (root, args, { db, pubsub }) => {
       const light = db.get("lights").find({ id: args.id }).value();
 
       if (light.deviceId) {
         sendState(light.deviceId, { on: false });
       }
 
+      pubsub.publish(LIGHT_REMOVED, { lightRemoved: args.id });
+
       db.get("lights").remove({ id: args.id }).write();
       return args.id;
     },
-    updateLight: async (root, { id, input }, { db }) => {
+    updateLight: async (root, { id, input }, { db, pubsub }) => {
       const oldLight = { ...db.get("lights").find({ id }).value() };
       const light = db
         .get("lights")
@@ -164,6 +195,8 @@ const resolvers = {
         sendState(light.deviceId, light.state);
       }
 
+      pubsub.publish(LIGHT_UPDATED, { lightUpdated: light });
+
       return light;
     },
   },
@@ -172,7 +205,7 @@ const resolvers = {
 const server = new ApolloServer({
   context: {
     db: database,
-    pubSub: new PubSub(),
+    pubsub: new PubSub(),
   },
   typeDefs,
   resolvers,

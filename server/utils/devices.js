@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import { database } from "./db.js";
 
-export const wss = new WebSocket.Server({ port: 81 });
+export const wss = new WebSocket.Server({ port: 80 });
 
 export let allDevices = [];
 
@@ -15,8 +15,6 @@ const modeMap = {
 wss.on("connection", function connection(ws, req) {
   const id = req.socket.remoteAddress.replace("::ffff:", "");
   const ip = id;
-
-  console.log("pushing new device with ip", ip);
 
   allDevices.push({ id, ip, ws });
 
