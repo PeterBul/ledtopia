@@ -70,7 +70,7 @@ void setup()
   server.begin();
   Serial.println("Server started");
 
-  webSocket.begin("10.0.0.14", 81, "/");
+  webSocket.begin("10.0.0.14", 80, "/");
   webSocket.onEvent(webSocketEvent);
   webSocket.setReconnectInterval(5000);
   webSocket.enableHeartbeat(3000, 3000, 2);
