@@ -1,5 +1,6 @@
 import WebSocket from "ws";
 import { database } from "./db.js";
+import { pubsub, DEVICES_UPDATED } from "./pubsub.js";
 
 export const wss = new WebSocket.Server({ port: 80 });
 
@@ -17,6 +18,7 @@ wss.on("connection", function connection(ws, req) {
   const ip = id;
 
   allDevices.push({ id, ip, ws });
+  pubsub.publish(DEVICES_UPDATED, { devicesUpdated: allDevices });
 
   const light = database.get("lights").find({ deviceId: id }).value();
   if (light) {
@@ -26,13 +28,15 @@ wss.on("connection", function connection(ws, req) {
   let timeStamp = new Date();
 
   let interval = setInterval(() => {
-    if (new Date().getTime() - timeStamp.getTime() > 5000) {
+    if (new Date().getTime() - timeStamp.getTime() > 4000) {
       console.log("terminating");
       allDevices = allDevices.filter((device) => device.id !== id);
+      pubsub.publish(DEVICES_UPDATED, { devicesUpdated: allDevices });
+      console.log("publishing");
       ws.terminate();
       clearInterval(interval);
     }
-  }, 3000);
+  }, 2000);
 
   ws.on("ping", function () {
     console.log("ping");

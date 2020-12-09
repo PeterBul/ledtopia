@@ -1,11 +1,15 @@
-import { ApolloServer, gql, PubSub } from "apollo-server";
+import { ApolloServer, gql } from "apollo-server";
 import { database } from "./utils/db.js";
 import { sendState, allDevices } from "./utils/devices.js";
-import nanoid from "nanoid";
+import {
+  pubsub,
+  LIGHT_UPDATED,
+  LIGHT_REMOVED,
+  LIGHT_ADDED,
+  DEVICES_UPDATED,
+} from "./utils/pubsub.js";
 
-const LIGHT_ADDED = "LIGHT_ADDED";
-const LIGHT_REMOVED = "LIGHT_REMOVED";
-const LIGHT_UPDATED = "LIGHT_UPDATED";
+import nanoid from "nanoid";
 
 const initialLightState = {
   mode: "SIMPLE",
@@ -22,6 +26,7 @@ const typeDefs = gql`
     lightAdded: Light
     lightRemoved: ID
     lightUpdated: Light
+    devicesUpdated: [Device]
   }
 
   type Query {
@@ -68,9 +73,6 @@ const typeDefs = gql`
 
   type Device {
     id: String
-    ip: String
-    mac: String
-    isReachable: Boolean
   }
 
   input LightInput {
@@ -116,6 +118,10 @@ const resolvers = {
       subscribe: (root, args, { pubsub }) =>
         pubsub.asyncIterator([LIGHT_REMOVED]),
     },
+    devicesUpdated: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([DEVICES_UPDATED]),
+    },
   },
   Query: {
     light: async (root, args, { db }) => {
@@ -131,12 +137,8 @@ const resolvers = {
   Light: {
     device: async ({ deviceId }) => {
       const device = allDevices.find((device) => device.id === deviceId);
-      if (!device) {
-        console.log("No device found");
-        return null;
-      } else {
-        return device;
-      }
+      if (!device) return { id: deviceId };
+      else return device;
     },
   },
   Mutation: {
@@ -205,7 +207,7 @@ const resolvers = {
 const server = new ApolloServer({
   context: {
     db: database,
-    pubsub: new PubSub(),
+    pubsub: pubsub,
   },
   typeDefs,
   resolvers,

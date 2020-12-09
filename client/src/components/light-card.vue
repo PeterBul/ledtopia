@@ -31,16 +31,15 @@
       <core-label>Device</core-label>
       <select
         :value="light.device ? light.device && light.device.id : 'none'"
-        @focus="getDevices"
         @change="handleSelectDevice"
       >
         <option value="none">None</option>
         <option
-          :disabled="deviceIsTaken(device)"
+          :disabled="device.isTaken"
           :key="i"
           :value="device.id"
-          v-for="(device, i) in allDevices"
-        >{{device.id}} {{deviceIsTaken(device) ? "(taken)" : ""}}</option>
+          v-for="(device, i) in deviceOptions"
+        >{{device.id}} {{device.isTaken ? "(taken)" : ""}} {{ device.isOnline ? "" : "offline" }}</option>
       </select>
     </core-box>
 
@@ -58,6 +57,7 @@
         <core-tab value="BOUNCE">Bounce</core-tab>
       </core-tabs>
     </core-box>
+
     <core-box mt="lg" v-if="showHue(light.state.mode)">
       <core-label>Hue</core-label>
       <input
@@ -69,6 +69,7 @@
         @input="e => updateLight(light.id, { state: { hue: parseInt(e.target.value) } })"
       />
     </core-box>
+
     <core-box mt="lg" v-if="showSaturation(light.state.mode)">
       <core-label>Saturation</core-label>
       <input
@@ -81,6 +82,7 @@
         @input="e => updateLight(light.id, { state: { saturation: parseInt(e.target.value) } })"
       />
     </core-box>
+
     <core-box mt="lg" v-if="showBrightness(light.state.mode)">
       <core-label>Brightness</core-label>
       <input
@@ -93,6 +95,7 @@
         @input="e => updateLight(light.id, { state: { brightness: parseInt(e.target.value) } })"
       />
     </core-box>
+
     <core-box mt="lg" v-if="light.state.mode === 'PULSE'">
       <core-label>Pulse speed</core-label>
       <input
@@ -105,6 +108,7 @@
         @input="e => updateLight(light.id, { state: { pulseSpeed: parseInt(e.target.value) }})"
       />
     </core-box>
+
     <core-box mt="lg" v-if="light.state.mode === 'RAINBOW'">
       <core-label>Rainbow speed</core-label>
       <input
@@ -126,14 +130,33 @@ export default {
   props: {
     copyLight: Function,
     allDevices: Array,
-    getDevices: Function,
     light: Object,
     updateLight: Function,
     removeLight: Function,
   },
+  computed: {
+    deviceOptions() {
+      const lightId = this.light.device?.id;
+
+      if (!lightId)
+        return this.allDevices.map((device) => ({ ...device, isOnline: true }));
+
+      const devices = this.allDevices
+        .filter((device) => device.id !== lightId)
+        .map((device) => ({ ...device, isOnline: true }));
+
+      const light = {
+        ...this.light.device,
+        isOnline: this.allDevices.some((device) => device.id === lightId),
+        isTaken: false,
+      };
+
+      return [...devices, { ...light }];
+    },
+  },
   methods: {
     deviceIsTaken(device) {
-      if (this.light.device && this.light.device.id === device.id) {
+      if (this.light.device && this.light.device.id === device) {
         return false;
       }
       if (device.isTaken) return true;

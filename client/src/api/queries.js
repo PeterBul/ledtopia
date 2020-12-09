@@ -109,3 +109,11 @@ export const LIGHT_REMOVED = /* GraphQL */ `
     lightRemoved
   }
 `;
+
+export const DEVICES_UPDATED = /* GraphQL */ `
+  subscription DevicesUpdated {
+    devicesUpdated {
+      id
+    }
+  }
+`;

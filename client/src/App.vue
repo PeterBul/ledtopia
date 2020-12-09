@@ -20,7 +20,6 @@
           <div :key="light.id" v-for="light in allLights">
             <light-card
               :copyLight="copyLight"
-              :getDevices="getAllDevices"
               :allDevices="deviceOptions"
               :light="light"
               :removeLight="removeLight"
@@ -46,6 +45,7 @@ import {
   ADD_LIGHT,
   LIGHT_UPDATED,
   LIGHT_REMOVED,
+  DEVICES_UPDATED,
 } from "./api/queries";
 import { getData, subscribeData } from "./api/getData";
 import LightCard from "./components/light-card";
@@ -54,7 +54,7 @@ import Spinner from "./components/spinner";
 export default {
   name: "App",
   components: { LightCard, Spinner },
-  async mounted() {
+  async created() {
     subscribeData({ query: LIGHT_ADDED }, ({ lightAdded }) => {
       if (lightAdded) {
         this.allLights.push(lightAdded);
@@ -74,6 +74,12 @@ export default {
         this.allLights = this.allLights.filter(
           (light) => lightRemoved !== light.id
         );
+      }
+    });
+
+    subscribeData({ query: DEVICES_UPDATED }, ({ devicesUpdated }) => {
+      if (devicesUpdated) {
+        this.allDevices = devicesUpdated;
       }
     });
 
@@ -133,7 +139,7 @@ export default {
         },
       });
     },
-    async updateLight(id, input) {
+    async updateLight(id, input = {}) {
       await getData({
         query: UPDATE_LIGHT,
         variables: {
