@@ -2,7 +2,7 @@ import WebSocket from "ws";
 import { database } from "./db.js";
 import { pubsub, DEVICES_UPDATED } from "./pubsub.js";
 
-export const wss = new WebSocket.Server({ port: 80 });
+export const wss = new WebSocket.Server({ port: 81 });
 
 export let allDevices = [];
 

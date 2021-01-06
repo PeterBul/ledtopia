@@ -1,6 +1,11 @@
 <template>
   <div id="app">
     <core-container size="sm" center>
+      <core-box px="lg" py="lg">
+        <core-button @click="$router.push('/')" variant="transparent">
+          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>Back
+        </core-button>
+      </core-box>
       <core-box px="lg">
         <core-box pb="xl">
           <core-flex align-items="center" justify-content="between">

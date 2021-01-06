@@ -1,4 +1,8 @@
 :root {
   --core-font-family: "VT323", monospace;
+  --core-color-ui-weaker: #fafafa;
+}
+
+[mode="dark"] {
   --core-color-ui-weaker: #272637;
 }

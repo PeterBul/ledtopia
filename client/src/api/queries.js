@@ -77,6 +77,9 @@ export const SCENE_ADDED = /* GraphQL */ `
     sceneAdded {
       id
       name
+      lights {
+        id
+      }
     }
   }
 `;

@@ -26,7 +26,9 @@ export const subscribeData = ({ query, variables = {} }, callback) => {
   waitForSocketConnection(() => {
     ws.send(
       JSON.stringify({
-        id: "1",
+        id: Math.random()
+          .toString(36)
+          .substring(7),
         type: "start",
         payload: {
           extensions: {},

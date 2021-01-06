@@ -7,7 +7,9 @@
         </router-link>
       </core-box>
     </core-container>
-    <router-view></router-view>
+    <keep-alive>
+      <router-view></router-view>
+    </keep-alive>
   </div>
 </template>
 

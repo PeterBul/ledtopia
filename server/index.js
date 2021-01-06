@@ -4,6 +4,7 @@ import { sendState, allDevices } from "./utils/devices.js";
 import {
   pubsub,
   SCENE_ADDED,
+  SCENE_REMOVED,
   LIGHT_UPDATED,
   LIGHT_REMOVED,
   LIGHT_ADDED,
@@ -166,7 +167,6 @@ const resolvers = {
   Light: {
     scene: async ({ sceneId }, args, { db }) => {
       if (!sceneId) return null;
-      console.log({ args, db, sceneId });
       const scene = db.get("scenes").find({ id: sceneId }).value();
       if (!scene) return null;
       else return scene;
@@ -221,7 +221,7 @@ const resolvers = {
     removeLight: async (root, args, { db, pubsub }) => {
       const light = db.get("lights").find({ id: args.id }).value();
 
-      if (light.deviceId) {
+      if (light?.deviceId) {
         sendState(light.deviceId, { on: false });
       }
 
@@ -256,6 +256,7 @@ const resolvers = {
     },
     removeScene: async (root, args, { db, pubsub }) => {
       db.get("scenes").remove({ id: args.id }).write();
+      db.get("lights").filter({ sceneId: args.id }).remove();
       pubsub.publish(SCENE_REMOVED, { sceneRemoved: args.id });
       return args.id;
     },

@@ -14,7 +14,7 @@
             clickable
             radius="md"
             p="lg"
-            depth="lg"
+            depth="sm"
             bg="ui-weaker"
             v-for="scene in allScenes"
             :key="scene.id"
@@ -25,7 +25,7 @@
                 <core-text tag="h2" size="lg">{{scene.name}}</core-text>
                 <core-text>{{ scene.lights.length }} lights</core-text>
               </div>
-              <core-button @click.prevent="handleRemoveScene">Delete</core-button>
+              <core-button @click.prevent="() => handleRemoveScene(scene.id)">Delete</core-button>
             </core-flex>
           </router-link>
           <div>
@@ -41,6 +41,7 @@
 import {
   ALL_SCENES,
   SCENE_ADDED,
+  SCENE_REMOVED,
   ADD_SCENE,
   REMOVE_SCENE,
 } from "../api/queries";
@@ -53,6 +54,14 @@ export default {
       console.log("what");
       if (sceneAdded) {
         this.allScenes.push(sceneAdded);
+      }
+    });
+
+    subscribeData({ query: SCENE_REMOVED }, ({ sceneRemoved }) => {
+      if (sceneRemoved) {
+        this.allScenes = this.allScenes.filter(
+          (scene) => scene.id !== sceneRemoved
+        );
       }
     });
 
