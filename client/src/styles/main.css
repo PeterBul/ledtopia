@@ -1,3 +1,7 @@
+a {
+  color: currentColor;
+}
+
 select {
   font-size: 16px;
   height: var(--core-element-height-default);

@@ -3,6 +3,7 @@ import { database } from "./utils/db.js";
 import { sendState, allDevices } from "./utils/devices.js";
 import {
   pubsub,
+  SCENE_ADDED,
   LIGHT_UPDATED,
   LIGHT_REMOVED,
   LIGHT_ADDED,
@@ -23,6 +24,8 @@ const initialLightState = {
 
 const typeDefs = gql`
   type Subscription {
+    sceneAdded: Scene
+    sceneRemoved: ID
     lightAdded: Light
     lightRemoved: ID
     lightUpdated: Light
@@ -41,7 +44,9 @@ const typeDefs = gql`
 
   type Mutation {
     addLight(input: LightInput): Light
+    addScene(input: SceneInput): Scene
     removeLight(id: ID!): ID!
+    removeScene(id: ID!): ID!
     updateLight(id: ID!, input: LightInput!): Light
   }
 
@@ -56,6 +61,7 @@ const typeDefs = gql`
     id: ID!
     name: String
     device: Device
+    scene: Scene
     type: LightType
     state: LightState
   }
@@ -78,7 +84,12 @@ const typeDefs = gql`
   input LightInput {
     name: String
     deviceId: ID
+    sceneId: ID
     state: LightStateInput
+  }
+
+  input SceneInput {
+    name: String
   }
 
   input LightStateInput {
@@ -106,6 +117,14 @@ const typeDefs = gql`
 
 const resolvers = {
   Subscription: {
+    sceneAdded: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([SCENE_ADDED]),
+    },
+    sceneRemoved: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([SCENE_REMOVED]),
+    },
     lightAdded: {
       subscribe: (root, args, { pubsub }) =>
         pubsub.asyncIterator([LIGHT_ADDED]),
@@ -133,8 +152,25 @@ const resolvers = {
     allDevices: async () => {
       return allDevices;
     },
+    allScenes: async (root, args, { db }) => {
+      return db.get("scenes").value();
+    },
+  },
+  Scene: {
+    lights: async ({ id }, args, { db }) => {
+      const lights = db.get("lights").filter({ sceneId: id }).value();
+      if (!lights.length) return [];
+      else return lights;
+    },
   },
   Light: {
+    scene: async ({ sceneId }, args, { db }) => {
+      if (!sceneId) return null;
+      console.log({ args, db, sceneId });
+      const scene = db.get("scenes").find({ id: sceneId }).value();
+      if (!scene) return null;
+      else return scene;
+    },
     device: async ({ deviceId }) => {
       const device = allDevices.find((device) => device.id === deviceId);
       if (!device) return { id: deviceId };
@@ -142,12 +178,29 @@ const resolvers = {
     },
   },
   Mutation: {
+    addScene: async (root, { input }, { db, pubsub }) => {
+      const id = nanoid(10);
+
+      db.get("scenes")
+        .push({
+          id: id,
+          name: input.name || "My scene",
+        })
+        .write();
+
+      const scene = db.get("scenes").find({ id }).value();
+
+      pubsub.publish(SCENE_ADDED, { sceneAdded: scene });
+
+      return scene;
+    },
     addLight: async (root, { input }, { db, pubsub }) => {
       const id = nanoid(10);
 
       db.get("lights")
         .push({
           id: id,
+          sceneId: input.sceneId || null,
           deviceId: input.deviceId || null,
           name: input.name || "My light",
           type: "LED_STRIP",
@@ -191,7 +244,7 @@ const resolvers = {
 
       console.log(input);
 
-      if (input.deviceId === null) {
+      if (!input.deviceId) {
         sendState(oldLight.deviceId, { on: false });
       } else if (light.deviceId) {
         sendState(light.deviceId, light.state);
@@ -200,6 +253,11 @@ const resolvers = {
       pubsub.publish(LIGHT_UPDATED, { lightUpdated: light });
 
       return light;
+    },
+    removeScene: async (root, args, { db, pubsub }) => {
+      db.get("scenes").remove({ id: args.id }).write();
+      pubsub.publish(SCENE_REMOVED, { sceneRemoved: args.id });
+      return args.id;
     },
   },
 };

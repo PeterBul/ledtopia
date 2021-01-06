@@ -178,7 +178,7 @@ export default {
       return mode === "SIMPLE" || mode === "PULSE";
     },
     showBrightness(mode) {
-      return mode === "SIMPLE" || mode === "PULSE";
+      return mode === "SIMPLE";
     },
     showSaturation(mode) {
       return mode === "SIMPLE" || mode === "PULSE";

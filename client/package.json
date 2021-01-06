@@ -13,7 +13,8 @@
     "core-js": "^3.6.5",
     "lodash": "^4.17.20",
     "subscriptions-transport-ws": "^0.9.18",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "vue-router": "^3.4.9"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.5.9",

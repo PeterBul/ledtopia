@@ -6,8 +6,8 @@
 
 #define FASTLED_ALLOW_INTERRUPTS 0 // Used for ESP8266.
 
-char ssid[] = "Riksheim"; // use your own network ssid and password
-char pass[] = "Hope6013";
+char ssid[] = "Get-2G-B643DD"; // use your own network ssid and password
+char pass[] = "dtkrgz2qgw";
 
 WiFiServer server(80);
 WebSocketsClient webSocket;
@@ -70,7 +70,7 @@ void setup()
   server.begin();
   Serial.println("Server started");
 
-  webSocket.begin("10.0.0.14", 80, "/");
+  webSocket.begin("192.168.0.11", 80, "/");
   webSocket.onEvent(webSocketEvent);
   webSocket.setReconnectInterval(5000);
   webSocket.enableHeartbeat(3000, 3000, 2);

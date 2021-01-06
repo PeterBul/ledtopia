@@ -1,4 +1,7 @@
-const ws = new WebSocket("ws://10.0.0.14:3000/graphql", "graphql-ws");
+const SOCKET_ENDPOINT = "ws://localhost:3000";
+const API_ENDPOINT = "http://localhost:3000";
+
+const ws = new WebSocket(SOCKET_ENDPOINT + "/graphql", "graphql-ws");
 
 ws.addEventListener("open", () => {
   ws.send(
@@ -45,7 +48,7 @@ export const subscribeData = ({ query, variables = {} }, callback) => {
 
 export const getData = async ({ query, variables }) => {
   try {
-    const { data, errors = [] } = await fetch("http://10.0.0.14:3000/graphql", {
+    const { data, errors = [] } = await fetch(API_ENDPOINT + "/graphql", {
       method: "POST",
       headers: {
         Accept: "application/json",

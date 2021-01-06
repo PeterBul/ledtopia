@@ -6,12 +6,27 @@ export const ALL_DEVICES = /* GraphQL */ `
   }
 `;
 
+export const ALL_SCENES = /* GraphQL */ `
+  query {
+    allScenes {
+      id
+      name
+      lights {
+        id
+      }
+    }
+  }
+`;
+
 export const ALL_LIGHTS = /* GraphQL */ `
   query {
     allLights {
       id
       name
       device {
+        id
+      }
+      scene {
         id
       }
       state {
@@ -31,19 +46,6 @@ export const UPDATE_LIGHT = /* GraphQL */ `
   mutation UpdateLight($id: ID!, $input: LightInput!) {
     updateLight(id: $id, input: $input) {
       id
-      name
-      device {
-        id
-      }
-      state {
-        on
-        mode
-        brightness
-        saturation
-        hue
-        pulseSpeed
-        rainbowSpeed
-      }
     }
   }
 `;
@@ -62,12 +64,44 @@ export const ADD_LIGHT = /* GraphQL */ `
   }
 `;
 
+export const ADD_SCENE = /* GraphQL */ `
+  mutation AddScene($input: SceneInput) {
+    addScene(input: $input) {
+      id
+    }
+  }
+`;
+
+export const SCENE_ADDED = /* GraphQL */ `
+  subscription SceneAdded {
+    sceneAdded {
+      id
+      name
+    }
+  }
+`;
+
+export const SCENE_REMOVED = /* GraphQL */ `
+  subscription SceneRemoved {
+    sceneRemoved
+  }
+`;
+
+export const REMOVE_SCENE = /* GraphQL */ `
+  mutation RemoveScene($id: ID!) {
+    removeScene(id: $id)
+  }
+`;
+
 export const LIGHT_ADDED = /* GraphQL */ `
   subscription LightAdded {
     lightAdded {
       id
       name
       device {
+        id
+      }
+      scene {
         id
       }
       state {
@@ -89,6 +123,9 @@ export const LIGHT_UPDATED = /* GraphQL */ `
       id
       name
       device {
+        id
+      }
+      scene {
         id
       }
       state {
