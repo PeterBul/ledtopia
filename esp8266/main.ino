@@ -6,10 +6,10 @@
 
 #define FASTLED_ALLOW_INTERRUPTS 0 // Used for ESP8266.
 
-char ssid[] = "Get-2G-B643DD"; // use your own network ssid and password
-char pass[] = "dtkrgz2qgw";
+char ssid[] = "Li-fi"; // use your own network ssid and password
+char pass[] = "internet";
 
-WiFiServer server(80);
+WiFiServer server(81);
 WebSocketsClient webSocket;
 
 // Fixed definitions cannot change on the fly.
@@ -70,7 +70,7 @@ void setup()
   server.begin();
   Serial.println("Server started");
 
-  webSocket.begin("192.168.0.11", 80, "/");
+  webSocket.begin("172.20.10.4", 81, "/");
   webSocket.onEvent(webSocketEvent);
   webSocket.setReconnectInterval(5000);
   webSocket.enableHeartbeat(3000, 3000, 2);
