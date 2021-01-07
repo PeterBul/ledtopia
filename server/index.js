@@ -244,7 +244,7 @@ const resolvers = {
 
       console.log(input);
 
-      if (!input.deviceId) {
+      if (!light.deviceId) {
         sendState(oldLight.deviceId, { on: false });
       } else if (light.deviceId) {
         sendState(light.deviceId, light.state);
