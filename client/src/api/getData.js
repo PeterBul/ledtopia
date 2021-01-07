@@ -1,5 +1,5 @@
-const SOCKET_ENDPOINT = "ws://localhost:3000";
-const API_ENDPOINT = "http://localhost:3000";
+const SOCKET_ENDPOINT = "ws://172.20.10.4:3000";
+const API_ENDPOINT = "http://172.20.10.4:3000";
 
 const ws = new WebSocket(SOCKET_ENDPOINT + "/graphql", "graphql-ws");
 

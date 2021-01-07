@@ -6,7 +6,7 @@
           <ion-icon name="arrow-back-outline" slot="start"></ion-icon>Back
         </core-button>
       </core-box>
-      <core-box px="lg">
+      <core-box px="lg" pb="xl">
         <core-box pb="xl">
           <core-flex align-items="center" justify-content="between">
             <core-text size="xxl">My scene</core-text>

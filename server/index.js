@@ -254,9 +254,18 @@ const resolvers = {
 
       return light;
     },
-    removeScene: async (root, args, { db, pubsub }) => {
+    removeScene: async (root, args, { db, pubsub, resolvers }) => {
       db.get("scenes").remove({ id: args.id }).write();
-      db.get("lights").filter({ sceneId: args.id }).remove();
+      const lights = db.get("lights").filter({ sceneId: args.id }).value();
+      lights.forEach((light) => {
+        resolvers.Mutation.removeLight(
+          undefined,
+          { id: light.id },
+          { db, pubsub, resolvers }
+        );
+      });
+
+      //db.get("lights").remove({ sceneId: args.id }).write();
       pubsub.publish(SCENE_REMOVED, { sceneRemoved: args.id });
       return args.id;
     },
@@ -267,6 +276,7 @@ const server = new ApolloServer({
   context: {
     db: database,
     pubsub: pubsub,
+    resolvers,
   },
   typeDefs,
   resolvers,
