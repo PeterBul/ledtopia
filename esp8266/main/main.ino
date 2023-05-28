@@ -1,15 +1,15 @@
+// #include <Arduino.h>
 #include <ESP8266WiFi.h>      // ESP WiFi library
 #include <WebSocketsClient.h> // WebSockets library
-#include <ArduinoJson.h>      // Handle JSON
 #include "FastLED.h"          // FastLED library.
-#include <ArduinoJson.h>
+#include <ArduinoJson.h>      // Handle JSON
 
 #define FASTLED_ALLOW_INTERRUPTS 0 // Used for ESP8266.
 
-char ssid[] = "Li-fi"; // use your own network ssid and password
-char pass[] = "internet";
+char ssid[] = "Curium Valley 5G 2.4"; // use your own network ssid and password
+char pass[] = "Trastevere2018";
 
-WiFiServer server(81);
+// WiFiServer server(8000);
 WebSocketsClient webSocket;
 
 // Fixed definitions cannot change on the fly.
@@ -30,7 +30,7 @@ bool IS_ON = true;
 uint8_t MAX_BRIGHT = 255;
 
 uint8_t SPEED = 10;
-uint8_t COLOR_H = 40;
+uint8_t COLOR_H = 60;
 uint8_t COLOR_S = 250;
 uint8_t COLOR_V = 100;
 uint8_t LIGHT_MODE = 0;
@@ -38,7 +38,7 @@ uint8_t LIGHT_MODE = 0;
 float RAINBOW_SPEED = 10;
 
 float PULSE_SPEED = 300;
-float MIN_PULSE_BRIGHT = 100;
+float MIN_PULSE_BRIGHT = 100; 
 float MAX_PULSE_BRIGHT = 255;
 
 // Variables for bounce effect
@@ -52,25 +52,31 @@ float COR[NUM_BALLS];
 
 struct CRGB leds[NUM_LEDS]; // Initialize our LED array.
 
+int led = 2;
+
 void setup()
 {
+  // delay(10000);
   Serial.begin(9600);
   Serial.println(ssid);
   WiFi.begin(ssid, pass);
 
   // connection with timeout
   int count = 0;
-  while ((WiFi.status() != WL_CONNECTED) && count < 17)
+  while ((WiFi.status() != WL_CONNECTED))
   {
     Serial.print(".");
     delay(500);
     count++;
   }
 
-  server.begin();
+  Serial.print("Connected");
+  Serial.println(WiFi.status() == WL_CONNECTED);
+  
+  // server.begin();
   Serial.println("Server started");
 
-  webSocket.begin("172.20.10.4", 81, "/");
+  webSocket.begin("192.168.32.74", 8000, "/");
   webSocket.onEvent(webSocketEvent);
   webSocket.setReconnectInterval(5000);
   webSocket.enableHeartbeat(3000, 3000, 2);
@@ -91,11 +97,19 @@ void setup()
     tCycle[i] = 0;
     COR[i] = 0.90 - float(i) / pow(NUM_BALLS, 2);
   }
+  pinMode(led, OUTPUT);
 }
 
 void loop()
 {
   webSocket.loop();
+  Serial.write("Hello from ESP8266");
+  delay(2000);
+  // digitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)
+  // delay(2000);               // wait for a second
+  // digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  // Serial.println("Works");
+  // delay(1000);               // wait for a second
 
   if (!IS_ON)
   {
@@ -123,18 +137,24 @@ void loop()
 
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 {
-  if (type == WStype_TEXT)
-  {
-    String str = (char *)payload;
-    DynamicJsonDocument state(200);
-    deserializeJson(state, str);
-    IS_ON = state["on"];
-    LIGHT_MODE = state["mode"];
-    COLOR_H = state["hue"];
-    COLOR_S = state["saturation"];
-    COLOR_V = state["brightness"];
-    RAINBOW_SPEED = state["rainbowSpeed"];
-    PULSE_SPEED = state["pulseSpeed"];
+  Serial.println(type);
+  switch (type) {
+    case WStype_CONNECTED:
+      Serial.println("Websocket connected");
+      break;
+    case WStype_TEXT:
+      String str = (char *)payload;
+      Serial.println(str);
+      DynamicJsonDocument state(200);
+      deserializeJson(state, str);
+      IS_ON = state["on"];
+      LIGHT_MODE = state["mode"];
+      COLOR_H = state["hue"];
+      COLOR_S = state["saturation"];
+      COLOR_V = state["brightness"];
+      RAINBOW_SPEED = state["rainbowSpeed"];
+      PULSE_SPEED = state["pulseSpeed"];
+      break;
   }
 }
 

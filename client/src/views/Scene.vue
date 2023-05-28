@@ -85,7 +85,7 @@ export default {
         this.allDevices = devicesUpdated;
       }
     });
-
+    console.log("Getting devices")
     this.getAllDevices();
     this.getAllLights();
   },
