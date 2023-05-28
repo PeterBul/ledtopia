@@ -4,7 +4,13 @@ import { pubsub, DEVICES_UPDATED } from "./pubsub.js";
 
 export const wss = new WebSocket.Server({ port: 8000 });
 
-export let allDevices = [];
+interface IDevice {
+  id: string | undefined;
+  ip: string | undefined;
+  ws: WebSocket;
+}
+
+export let allDevices: IDevice[] = [];
 
 const modeMap = {
   SIMPLE: 0,
@@ -13,8 +19,10 @@ const modeMap = {
   BOUNCE: 3,
 };
 
+let interval;
+
 wss.on("connection", function connection(ws, req) {
-  const id = req.socket.remoteAddress.replace("::ffff:", "");
+  const id = req.socket.remoteAddress?.replace("::ffff:", "");
   const ip = id;
 
   console.log("Something is trying to connect");
@@ -22,14 +30,15 @@ wss.on("connection", function connection(ws, req) {
   allDevices.push({ id, ip, ws });
   pubsub.publish(DEVICES_UPDATED, { devicesUpdated: allDevices });
 
+  // @ts-ignore
   const light = database.get("lights").find({ deviceId: id }).value();
-  if (light) {
+  if (id && light) {
     sendState(id, light.state);
   }
 
   let timeStamp = new Date();
 
-  let interval = setInterval(() => {
+  interval = setInterval(() => {
     if (new Date().getTime() - timeStamp.getTime() > 4000) {
       console.log("terminating");
       allDevices = allDevices.filter((device) => device.id !== id);
@@ -41,7 +50,6 @@ wss.on("connection", function connection(ws, req) {
   }, 2000);
 
   ws.on("ping", function () {
-    console.log("ping");
     timeStamp = new Date();
   });
 
@@ -54,36 +62,14 @@ wss.on("connection", function connection(ws, req) {
 wss.on("close", function close() {
   clearInterval(interval);
 });
-/*
-{
-  mode: "SIMPLE",
-  on: false,
-  hue: 0,
-  saturation: 255,
-  brightness: 255,
-  pulseSpeed: 200,
-  rainbowSpeed: 10,
-};
-*/
-/**
- *
- * @param {   string  } id
- * @param {{  mode: string,
- *            on: boolean,
- *            hue: number,
- *            saturation: number,
- *            brightness: number,
- *            pulseSpeed: number,
- *            rainbowSpeed: number
- *        }} state
- */
+
 export async function sendState(id, state) {
   const device = allDevices.find((device) => device.id === id);
   if (!device) console.log("Could update device, as it seems to be offline");
   if (device && device.ws && device.ws.readyState === WebSocket.OPEN) {
     device.ws.send(
       JSON.stringify({
-        m: modeMap[state.mode],
+        m: state.mode && modeMap[state.mode],
         o: state.on,
         h: state.hue,
         s: state.saturation,

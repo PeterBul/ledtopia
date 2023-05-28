@@ -6,8 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "nodemon --ignore 'db.json'",
+    "dev": "tsc && node.exe ./dist/index.js",
     "transpile": "babel ./index.js --out-dir dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
   },
   "keywords": [],
   "author": "",
@@ -22,8 +23,16 @@
     "is-reachable": "^5.0.0",
     "lowdb": "^1.0.0",
     "nanoid": "^2.1.11",
-    "nodemon": "^2.0.6",
     "shortid": "^2.2.16",
     "ws": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/lowdb": "^1.0.11",
+    "@types/node": "^20.2.5",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "eslint": "^8.36.0",
+    "eslint-config-standard-with-typescript": "^34.0.1",
+    "nodemon": "^2.0.22",
+    "typescript": "^5.0.4"
   }
 }
