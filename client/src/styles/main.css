@@ -74,7 +74,7 @@ core-select::part(input-field) {
   font-family: inherit;
 }
 
-.device {
+.list-card {
   background: var(--core-color-ui-weaker);
   padding: var(--core-space-sm);
   box-shadow: var(--core-depth-sm);
@@ -83,14 +83,14 @@ core-select::part(input-field) {
   -webkit-appearance: none;
 }
 
-.device summary {
+.list-card summary {
   outline: 0;
   cursor: pointer;
   position: relative;
   -webkit-appearance: none;
 }
 
-.device summary::-webkit-details-marker {
+.list-card summary::-webkit-details-marker {
   display: none;
 }
 
@@ -202,3 +202,73 @@ input[type="range"] {
 .tab-buttons core-tab[selected] {
   background: var(--core-color-ui-weak);
 }
+
+.ml-auto {
+  margin-left: auto;
+}
+
+.mx-xs {
+  margin-left: var(--core-space-xs);
+  margin-right: var(--core-space-xs);
+}
+
+.mx-xxs {
+  margin-left: var(--core-space-xxs);
+  margin-right: var(--core-space-xxs);
+}
+
+.mb-md {
+  margin-bottom: var(--core-space-md);
+}
+
+.text-input {
+  border: 0;
+  outline: 0;
+  background: var(--core-color-ui-weak);
+  padding: var(--core-space-xs);
+  border-radius: var(--core-border-radius-default);
+  box-shadow: var(--core-depth-sm);
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  height: 14px;
+}
+
+.text-input:focus {
+  box-shadow: var(--core-depth-lg);
+}
+
+.text-input::placeholder {
+  color: var(--core-color-text-disabled);
+}
+
+.enum-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--core-space-xs);
+  border-radius: var(--core-border-radius-default);
+  background: var(--core-color-ui-weak);
+  box-shadow: var(--core-depth-sm);
+  cursor: pointer;
+  margin-top: var(--core-space-xs);
+  margin-bottom: var(--core-space-xs);
+}
+
+core-button:focus {
+  outline: 2px solid var(--core-color-primary);
+}
+
+summary {
+  outline: 0;
+  cursor: pointer;
+  position: relative;
+  -webkit-appearance: none;
+  border-radius: var(--core-border-radius-default);
+  padding: var(--core-space-xs);
+}
+
+details summary:focus {
+  outline: 2px solid var(--core-color-primary);
+}
+

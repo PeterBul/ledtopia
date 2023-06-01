@@ -1,5 +1,5 @@
 <template>
-  <details class="device">
+  <details class="list-card">
     <summary>
       <core-flex align-items="center" justify-content="between">
         <core-flex align-items="center" justify-content="start">
@@ -84,21 +84,21 @@
       label="Hue"
       :updateLight="updateHue"
       type="hue"
-    />
+    ></color-slider>
     <color-slider
       :light="light"
       :show="showSaturation(light.state.mode)"
       label="Saturation"
       :updateLight="updateSaturation"
       type="saturation"
-    />
+    ></color-slider>
     <color-slider
       :light="light"
       :show="showBrightness(light.state.mode)"
       label="Brightness"
       :updateLight="updateBrightness"
       type="brightness"
-    />
+    ></color-slider>
 
     <core-box mt="lg" v-if="light.state.mode === 'PULSE'">
       <core-label>Pulse speed</core-label>

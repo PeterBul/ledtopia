@@ -9,6 +9,9 @@ import {
   LIGHT_REMOVED,
   LIGHT_ADDED,
   DEVICES_UPDATED,
+  ENUM_ADDED,
+  ENUM_REMOVED,
+  ENUM_UPDATED,
 } from "./utils/pubsub.js";
 
 import nanoid from "nanoid";
@@ -31,6 +34,9 @@ const typeDefs = gql`
     lightRemoved: ID
     lightUpdated: Light
     devicesUpdated: [Device]
+    enumAdded: Enum
+    enumRemoved: ID
+    enumUpdated: Enum
   }
 
   type Query {
@@ -41,6 +47,9 @@ const typeDefs = gql`
     light(id: ID!): Light
 
     allDevices: [Device]
+
+    allEnums: [Enum]
+    enum(id: ID!): Enum
   }
 
   type Mutation {
@@ -49,6 +58,9 @@ const typeDefs = gql`
     removeLight(id: ID!): ID!
     removeScene(id: ID!): ID!
     updateLight(id: ID!, input: LightInput!): Light
+    addEnum(input: EnumInput): Enum
+    removeEnum(id: ID!): ID!
+    updateEnum(id: ID!, input: EnumInput!): Enum
   }
 
   type Scene {
@@ -82,6 +94,12 @@ const typeDefs = gql`
     id: String
   }
 
+  type Enum {
+    id: ID!
+    name: String
+    values: [String]
+  }
+
   input LightInput {
     name: String
     deviceId: ID
@@ -102,6 +120,11 @@ const typeDefs = gql`
     saturation: Float
     pulseSpeed: Float
     rainbowSpeed: Float
+  }
+
+  input EnumInput {
+    name: String
+    values: [String]
   }
 
   enum StateType {
@@ -142,6 +165,17 @@ const resolvers = {
       subscribe: (root, args, { pubsub }) =>
         pubsub.asyncIterator([DEVICES_UPDATED]),
     },
+    enumAdded: {
+      subscribe: (root, args, { pubsub }) => pubsub.asyncIterator([ENUM_ADDED]),
+    },
+    enumRemoved: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([ENUM_REMOVED]),
+    },
+    enumUpdated: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([ENUM_UPDATED]),
+    },
   },
   Query: {
     light: async (root, args, { db }) => {
@@ -155,6 +189,12 @@ const resolvers = {
     },
     allScenes: async (root, args, { db }) => {
       return db.get("scenes").value();
+    },
+    enum: async (root, args, { db }) => {
+      return db.get("enums").find({ id: args.id }).value();
+    },
+    allEnums: async (root, args, { db }) => {
+      return db.get("enums").value();
     },
   },
   Scene: {
@@ -218,6 +258,23 @@ const resolvers = {
 
       return light;
     },
+    addEnum: async (root, { input }, { db, pubsub }) => {
+      const id = nanoid(10);
+
+      db.get("enums")
+        .push({
+          id: id,
+          name: input.name || "My enum",
+          values: input.values || [],
+        })
+        .write();
+
+      const enumm = db.get("enums").find({ id }).value();
+
+      pubsub.publish(ENUM_ADDED, { enumAdded: enumm });
+
+      return enumm;
+    },
     removeLight: async (root, args, { db, pubsub }) => {
       const light = db.get("lights").find({ id: args.id }).value();
 
@@ -254,6 +311,20 @@ const resolvers = {
 
       return light;
     },
+    updateEnum: async (root, { id, input }, { db, pubsub }) => {
+      const oldEnum = { ...db.get("enums").find({ id }).value() };
+      const enumm = db
+        .get("enums")
+        .find({ id })
+        .assign({
+          ...oldEnum,
+          ...input,
+        })
+        .write();
+
+      pubsub.publish(ENUM_UPDATED, { enumUpdated: enumm });
+      return enumm;
+    },
     removeScene: async (root, args, { db, pubsub, resolvers }) => {
       db.get("scenes").remove({ id: args.id }).write();
       const lights = db.get("lights").filter({ sceneId: args.id }).value();
@@ -267,6 +338,11 @@ const resolvers = {
 
       //db.get("lights").remove({ sceneId: args.id }).write();
       pubsub.publish(SCENE_REMOVED, { sceneRemoved: args.id });
+      return args.id;
+    },
+    removeEnum: async (root, args, { db, pubsub }) => {
+      db.get("enums").remove({ id: args.id }).write();
+      pubsub.publish(ENUM_REMOVED, { enumRemoved: args.id });
       return args.id;
     },
   },

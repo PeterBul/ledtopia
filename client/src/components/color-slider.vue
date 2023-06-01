@@ -1,16 +1,16 @@
 <template>
-      <core-box mt="lg" v-if="show">
-      <core-label>{{ label }}</core-label>
-      <input
-        :class="className"
-        type="range"
-        min="0"
-        max="255"
-        :value="value"
-        :style="style"
-        @input="e => updateLight(parseInt(e.target.value))"
-      />
-    </core-box>
+  <core-box mt="lg" v-if="show">
+    <core-label>{{ label }}</core-label>
+    <input
+      :class="className"
+      type="range"
+      min="0"
+      max="255"
+      :value="value"
+      :style="style"
+      @input="(e) => updateLight(parseInt(e.target.value))"
+    />
+  </core-box>
 </template>
 <script>
 import convertColor from "color-convert";
@@ -46,8 +46,8 @@ export default {
       return this.light.state[this.type];
     },
     style() {
-      if (this.type === 'saturation' || this.type === 'brightness') {
-        return { '--color': `${this.getHex(this.light.state.hue, 100, 100)}` };
+      if (this.type === "saturation" || this.type === "brightness") {
+        return { "--color": `${this.getHex(this.light.state.hue, 100, 100)}` };
       } else {
         return {};
       }
@@ -55,10 +55,10 @@ export default {
   },
   methods: {
     getHex(h, s, v) {
-        const multiplyHue = 360 / 255;
-        const hex = convertColor.hsv.hex(h * multiplyHue, s, v);
-        return `#${hex}`;
-      },
-  }  
-}
+      const multiplyHue = 360 / 255;
+      const hex = convertColor.hsv.hex(h * multiplyHue, s, v);
+      return `#${hex}`;
+    },
+  },
+};
 </script>

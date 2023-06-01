@@ -8,8 +8,10 @@ Vue.use(VueRouter);
 
 import Home from "./views/Home.vue";
 import Scene from "./views/Scene.vue";
+import Enums from "./views/Enum.vue";
 
 Vue.config.productionTip = false;
+Vue.config.ignoredElements = [/^ion-/];
 
 const router = new VueRouter({
   routes: [
@@ -20,6 +22,10 @@ const router = new VueRouter({
     {
       path: "/scene/:id",
       component: Scene,
+    },
+    {
+      path: "/enums/",
+      component: Enums,
     },
   ],
 });

@@ -5,6 +5,13 @@ import { ILight } from "../interfaces/ILight.js";
 
 interface IDatabase {
   lights: ILight[];
+  enums: IEnum[];
+}
+
+interface IEnum {
+  id: string;
+  name: string;
+  values: string[];
 }
 
 const adapter: AdapterSync<IDatabase> = new FileSync("db.json");
@@ -17,5 +24,6 @@ database
     scenes: [],
     controlGroups: [],
     controlEntities: [],
+    enums: [],
   })
   .write();
