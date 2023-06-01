@@ -1,5 +1,5 @@
-const SOCKET_ENDPOINT = "ws://172.20.10.4:3000";
-const API_ENDPOINT = "http://172.20.10.4:3000";
+const SOCKET_ENDPOINT = "ws://192.168.32.74:3000";
+const API_ENDPOINT = "http://192.168.32.74:3000";
 
 const ws = new WebSocket(SOCKET_ENDPOINT + "/graphql", "graphql-ws");
 
@@ -10,11 +10,13 @@ ws.addEventListener("open", () => {
       payload: { Authorization: "Bearer" },
     })
   );
+  console.log("web socket open");
 });
 
 function waitForSocketConnection(callback) {
   setTimeout(function() {
     if (ws.readyState === 1) {
+      console.log("Connection is made");
       callback();
     } else {
       waitForSocketConnection(callback);
@@ -41,6 +43,7 @@ export const subscribeData = ({ query, variables = {} }, callback) => {
   });
 
   ws.addEventListener("message", (val) => {
+    console.log("Received message", val);
     const res = JSON.parse(val.data);
     if (res.type === "data") {
       callback(res.payload.data);
@@ -61,6 +64,7 @@ export const getData = async ({ query, variables }) => {
         variables,
       }),
     }).then((res) => res.json());
+    console.log(data);
 
     if (errors.length > 0) {
       console.log(
