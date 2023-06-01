@@ -21,3 +21,8 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
+
+out/
+dist/
+# TS -incremental file
+tsconfig.tsbuildinfo
