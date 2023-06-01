@@ -42,6 +42,64 @@ export const ALL_LIGHTS = /* GraphQL */ `
   }
 `;
 
+export const ALL_ENUMS = /* GraphQL */ `
+  query {
+    allEnums {
+      id
+      name
+      values
+    }
+  }
+`;
+
+export const UPDATE_ENUM = /* GraphQL */ `
+  mutation UpdateEnum($id: ID!, $input: EnumInput!) {
+    updateEnum(id: $id, input: $input) {
+      id
+    }
+  }
+`;
+
+export const REMOVE_ENUM = /* GraphQL */ `
+  mutation RemoveEnum($id: ID!) {
+    removeEnum(id: $id)
+  }
+`;
+
+export const ADD_ENUM = /* GraphQL */ `
+  mutation AddEnum($input: EnumInput) {
+    addEnum(input: $input) {
+      id
+    }
+  }
+`;
+
+export const ENUM_ADDED = /* GraphQL */ `
+  subscription EnumAdded {
+    enumAdded {
+      id
+      name
+      values
+    }
+  }
+`;
+
+export const ENUM_REMOVED = /* GraphQL */ `
+  subscription EnumRemoved {
+    enumRemoved
+  }
+`;
+
+export const ENUM_UPDATED = /* GraphQL */ `
+  subscription EnumUpdated {
+    enumUpdated {
+      id
+      name
+      values
+    }
+  }
+`;
+
 export const UPDATE_LIGHT = /* GraphQL */ `
   mutation UpdateLight($id: ID!, $input: LightInput!) {
     updateLight(id: $id, input: $input) {

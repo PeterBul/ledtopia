@@ -1,25 +1,41 @@
 <template>
-  <details class="device">
+  <details class="list-card">
     <summary>
       <core-flex align-items="center" justify-content="between">
         <core-flex align-items="center" justify-content="start">
           <div
-            :style="{ marginRight: 'var(--core-space-sm)', background: `${getHex(light.state.hue, 100, 100)}`, height: '20px', width: '20px', borderRadius: '50%'}"
+            :style="{
+              marginRight: 'var(--core-space-sm)',
+              background: `${getHex(light.state.hue, 100, 100)}`,
+              height: '20px',
+              width: '20px',
+              borderRadius: '50%',
+            }"
           ></div>
-          <core-text size="lg">{{ light.name || "Device"}}</core-text>
+          <core-text size="lg">{{ light.name || "Device" }}</core-text>
         </core-flex>
         <core-flex align-items="center" justify-content="end">
           <core-toggle
             :checked="light.state.on"
             @click.prevent
-            @change.prevent="e => updateLight(light.id, { state: { on: e.target.checked }})"
+            @change.prevent="
+              (e) => updateLight(light.id, { state: { on: e.target.checked } })
+            "
           ></core-toggle>
           <core-overlay position-x="right">
-            <core-button variant="transparent" @click.prevent slot="trigger" full tabindex="0">
+            <core-button
+              variant="transparent"
+              @click.prevent
+              slot="trigger"
+              full
+              tabindex="0"
+            >
               <ion-icon name="ellipsis-vertical-outline"></ion-icon>
             </core-button>
             <core-menu style="min-width: 150px" slot="content">
-              <core-menu-item @click.prevent="() => copyLight(light.state)">Copy</core-menu-item>
+              <core-menu-item @click.prevent="() => copyLight(light.state)"
+                >Copy</core-menu-item
+              >
               <core-menu-item @click="handleRemoveLight">Delete</core-menu-item>
             </core-menu>
           </core-overlay>
@@ -39,7 +55,9 @@
           :key="i"
           :value="device.id"
           v-for="(device, i) in deviceOptions"
-        >{{device.id}} {{device.isTaken ? "(taken)" : ""}} {{ device.isOnline ? "" : "offline" }}</option>
+          >{{ device.id }} {{ device.isTaken ? "(taken)" : "" }}
+          {{ device.isOnline ? "" : "offline" }}</option
+        >
       </select>
     </core-box>
 
@@ -49,7 +67,9 @@
         full
         class="tab-buttons"
         :value="light.state.mode"
-        @change="e => updateLight(light.id, { state: { mode: e.target.value }})"
+        @change="
+          (e) => updateLight(light.id, { state: { mode: e.target.value } })
+        "
       >
         <core-tab value="SIMPLE">Simple</core-tab>
         <core-tab value="PULSE">Pulse</core-tab>
@@ -58,54 +78,43 @@
       </core-tabs>
     </core-box>
 
-    <core-box mt="lg" v-if="showHue(light.state.mode)">
-      <core-label>Hue</core-label>
-      <input
-        class="hue-range"
-        type="range"
-        min="0"
-        max="255"
-        :value="light.state.hue"
-        @input="e => updateLight(light.id, { state: { hue: parseInt(e.target.value) } })"
-      />
-    </core-box>
-
-    <core-box mt="lg" v-if="showSaturation(light.state.mode)">
-      <core-label>Saturation</core-label>
-      <input
-        class="saturation-range"
-        type="range"
-        min="0"
-        max="255"
-        :style="{ '--color': `${getHex(light.state.hue, 100, 100)}`}"
-        :value="light.state.saturation"
-        @input="e => updateLight(light.id, { state: { saturation: parseInt(e.target.value) } })"
-      />
-    </core-box>
-
-    <core-box mt="lg" v-if="showBrightness(light.state.mode)">
-      <core-label>Brightness</core-label>
-      <input
-        class="brightness-range"
-        type="range"
-        min="0"
-        max="255"
-        :style="{ '--color': `${getHex(light.state.hue, 100, 100)}`}"
-        :value="light.state.brightness"
-        @input="e => updateLight(light.id, { state: { brightness: parseInt(e.target.value) } })"
-      />
-    </core-box>
+    <color-slider
+      :light="light"
+      :show="showHue(light.state.mode)"
+      label="Hue"
+      :updateLight="updateHue"
+      type="hue"
+    ></color-slider>
+    <color-slider
+      :light="light"
+      :show="showSaturation(light.state.mode)"
+      label="Saturation"
+      :updateLight="updateSaturation"
+      type="saturation"
+    ></color-slider>
+    <color-slider
+      :light="light"
+      :show="showBrightness(light.state.mode)"
+      label="Brightness"
+      :updateLight="updateBrightness"
+      type="brightness"
+    ></color-slider>
 
     <core-box mt="lg" v-if="light.state.mode === 'PULSE'">
       <core-label>Pulse speed</core-label>
       <input
         class="range"
         type="range"
-        :style="{ transform: 'rotate(180deg)'}"
+        :style="{ transform: 'rotate(180deg)' }"
         min="10"
         max="500"
         :value="light.state.pulseSpeed"
-        @input="e => updateLight(light.id, { state: { pulseSpeed: parseInt(e.target.value) }})"
+        @input="
+          (e) =>
+            updateLight(light.id, {
+              state: { pulseSpeed: parseInt(e.target.value) },
+            })
+        "
       />
     </core-box>
 
@@ -117,7 +126,12 @@
         min="0"
         max="255"
         :value="light.state.rainbowSpeed"
-        @input="e => updateLight(light.id, { state: { rainbowSpeed: parseInt(e.target.value) }})"
+        @input="
+          (e) =>
+            updateLight(light.id, {
+              state: { rainbowSpeed: parseInt(e.target.value) },
+            })
+        "
       />
     </core-box>
   </details>
@@ -125,6 +139,7 @@
 
 <script>
 import convertColor from "color-convert";
+import ColorSlider from "./color-slider";
 
 export default {
   props: {
@@ -134,6 +149,7 @@ export default {
     updateLight: Function,
     removeLight: Function,
   },
+  components: { ColorSlider },
   computed: {
     deviceOptions() {
       const lightId = this.light.device?.id;
@@ -187,6 +203,21 @@ export default {
       const multiplyHue = 360 / 255;
       const hex = convertColor.hsv.hex(h * multiplyHue, s, v);
       return `#${hex}`;
+    },
+    updateHue(v) {
+      this.updateLight(this.light.id, {
+        state: { hue: v },
+      });
+    },
+    updateBrightness(v) {
+      this.updateLight(this.light.id, {
+        state: { brightness: v },
+      });
+    },
+    updateSaturation(v) {
+      this.updateLight(this.light.id, {
+        state: { saturation: v },
+      });
     },
   },
 };
