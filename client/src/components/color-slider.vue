@@ -8,7 +8,7 @@
       max="255"
       :value="value"
       :style="style"
-      @input="(e) => updateLight(parseInt(e.target.value))"
+      @input="(e) => handleInput(parseInt(e.target.value))"
     />
   </core-box>
 </template>
@@ -17,7 +17,7 @@ import convertColor from "color-convert";
 
 export default {
   props: {
-    light: {
+    state: {
       type: Object,
       required: true,
     },
@@ -27,10 +27,6 @@ export default {
     },
     label: {
       type: String,
-      required: true,
-    },
-    updateLight: {
-      type: Function,
       required: true,
     },
     type: {
@@ -43,11 +39,11 @@ export default {
       return `range ${this.type}-range`;
     },
     value() {
-      return this.light.state[this.type];
+      return this.state[this.type];
     },
     style() {
       if (this.type === "saturation" || this.type === "brightness") {
-        return { "--color": `${this.getHex(this.light.state.hue, 100, 100)}` };
+        return { "--color": `${this.getHex(this.state.hue, 100, 100)}` };
       } else {
         return {};
       }
@@ -58,6 +54,9 @@ export default {
       const multiplyHue = 360 / 255;
       const hex = convertColor.hsv.hex(h * multiplyHue, s, v);
       return `#${hex}`;
+    },
+    handleInput(value) {
+      this.$emit("change", value);
     },
   },
 };

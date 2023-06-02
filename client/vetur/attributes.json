@@ -1,0 +1,116 @@
+{
+  "color-slider/light": {
+    "type": "object"
+  },
+  "ColorSlider/light": {
+    "type": "object"
+  },
+  "color-slider/show": {
+    "type": "boolean"
+  },
+  "ColorSlider/show": {
+    "type": "boolean"
+  },
+  "color-slider/label": {
+    "type": "string"
+  },
+  "ColorSlider/label": {
+    "type": "string"
+  },
+  "color-slider/updateLight": {
+    "type": "function"
+  },
+  "ColorSlider/updateLight": {
+    "type": "function"
+  },
+  "color-slider/type": {
+    "type": "string"
+  },
+  "ColorSlider/type": {
+    "type": "string"
+  },
+  "controller/copyLight": {
+    "type": "function"
+  },
+  "Controller/copyLight": {
+    "type": "function"
+  },
+  "controller/allDevices": {
+    "type": "array"
+  },
+  "Controller/allDevices": {
+    "type": "array"
+  },
+  "controller/light": {
+    "type": "object"
+  },
+  "Controller/light": {
+    "type": "object"
+  },
+  "controller/updateLight": {
+    "type": "function"
+  },
+  "Controller/updateLight": {
+    "type": "function"
+  },
+  "controller/removeLight": {
+    "type": "function"
+  },
+  "Controller/removeLight": {
+    "type": "function"
+  },
+  "edit-save-buttons/isEditing": {
+    "type": "boolean"
+  },
+  "EditSaveButtons/isEditing": {
+    "type": "boolean"
+  },
+  "enum-card/enumm": {
+    "type": "object"
+  },
+  "EnumCard/enumm": {
+    "type": "object"
+  },
+  "enum-card/removeEnum": {
+    "type": "function"
+  },
+  "EnumCard/removeEnum": {
+    "type": "function"
+  },
+  "enum-card/updateEnum": {
+    "type": "function"
+  },
+  "EnumCard/updateEnum": {
+    "type": "function"
+  },
+  "light-card/copyLight": {
+    "type": "function"
+  },
+  "LightCard/copyLight": {
+    "type": "function"
+  },
+  "light-card/allDevices": {
+    "type": "array"
+  },
+  "LightCard/allDevices": {
+    "type": "array"
+  },
+  "light-card/light": {
+    "type": "object"
+  },
+  "LightCard/light": {
+    "type": "object"
+  },
+  "light-card/updateLight": {
+    "type": "function"
+  },
+  "LightCard/updateLight": {
+    "type": "function"
+  },
+  "light-card/removeLight": {
+    "type": "function"
+  },
+  "LightCard/removeLight": {
+    "type": "function"
+  }
+}

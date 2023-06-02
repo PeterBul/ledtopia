@@ -22,8 +22,7 @@ database
     lights: [],
     devices: {},
     scenes: [],
-    controlGroups: [],
-    controlEntities: [],
+    controllers: [],
     enums: [],
   })
   .write();

@@ -24,6 +24,11 @@
                   <core-text size="md">Enums</core-text>
                 </core-menu-item>
               </router-link>
+              <router-link to="/controllers">
+                <core-menu-item>
+                  <core-text size="md">Controllers</core-text>
+                </core-menu-item>
+              </router-link>
             </core-menu>
           </core-overlay>
         </core-box>

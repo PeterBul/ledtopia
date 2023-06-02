@@ -11,6 +11,10 @@ export const ENUM_UPDATED = "ENUM_UPDATED";
 export const ENUM_REMOVED = "ENUM_REMOVED";
 export const ENUM_ADDED = "ENUM_ADDED";
 
+export const CONTROLLER_ADDED = "CONTROLLER_ADDED";
+export const CONTROLLER_REMOVED = "CONTROLLER_REMOVED";
+export const CONTROLLER_UPDATED = "CONTROLLER_UPDATED";
+
 const pub = new PubSub();
 
 export const pubsub = pub;

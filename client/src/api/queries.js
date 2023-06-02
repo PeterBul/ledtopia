@@ -52,6 +52,32 @@ export const ALL_ENUMS = /* GraphQL */ `
   }
 `;
 
+export const ALL_CONTROLLERS = /* GraphQL */ `
+  query {
+    allControllers {
+      id
+      name
+      device {
+        id
+      }
+      controlMode
+      simpleState {
+        on
+        mode
+        brightness
+        saturation
+        hue
+        pulseSpeed
+        rainbowSpeed
+      }
+      advancedFields {
+        type
+        value
+      }
+    }
+  }
+`;
+
 export const UPDATE_ENUM = /* GraphQL */ `
   mutation UpdateEnum($id: ID!, $input: EnumInput!) {
     updateEnum(id: $id, input: $input) {
@@ -69,6 +95,28 @@ export const REMOVE_ENUM = /* GraphQL */ `
 export const ADD_ENUM = /* GraphQL */ `
   mutation AddEnum($input: EnumInput) {
     addEnum(input: $input) {
+      id
+    }
+  }
+`;
+
+export const UPDATE_CONTROLLER = /* GraphQL */ `
+  mutation UpdateController($id: ID!, $input: ControllerInput!) {
+    updateController(id: $id, input: $input) {
+      id
+    }
+  }
+`;
+
+export const REMOVE_CONTROLLER = /* GraphQL */ `
+  mutation RemoveController($id: ID!) {
+    removeController(id: $id)
+  }
+`;
+
+export const ADD_CONTROLLER = /* GraphQL */ `
+  mutation AddController($input: ControllerInput) {
+    addController(input: $input) {
       id
     }
   }
@@ -96,6 +144,64 @@ export const ENUM_UPDATED = /* GraphQL */ `
       id
       name
       values
+    }
+  }
+`;
+
+export const CONTROLLER_ADDED = /* GraphQL */ `
+  subscription ControllerAdded {
+    controllerAdded {
+      id
+      name
+      device {
+        id
+      }
+      controlMode
+      simpleState {
+        on
+        mode
+        hue
+        brightness
+        saturation
+        pulseSpeed
+        rainbowSpeed
+      }
+      advancedFields {
+        type
+        value
+      }
+    }
+  }
+`;
+
+export const CONTROLLER_REMOVED = /* GraphQL */ `
+  subscription ControllerRemoved {
+    controllerRemoved
+  }
+`;
+
+export const CONTROLLER_UPDATED = /* GraphQL */ `
+  subscription ControllerUpdated {
+    controllerUpdated {
+      id
+      name
+      device {
+        id
+      }
+      controlMode
+      simpleState {
+        on
+        mode
+        hue
+        brightness
+        saturation
+        pulseSpeed
+        rainbowSpeed
+      }
+      advancedFields {
+        type
+        value
+      }
     }
   }
 `;

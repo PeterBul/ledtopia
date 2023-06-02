@@ -242,7 +242,7 @@ input[type="range"] {
   color: var(--core-color-text-disabled);
 }
 
-.enum-value {
+.card-1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -272,3 +272,7 @@ details summary:focus {
   outline: 2px solid var(--core-color-primary);
 }
 
+
+.flex {
+  display: flex;
+}

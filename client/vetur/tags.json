@@ -1,0 +1,106 @@
+{
+  "color-slider": {
+    "attributes": [
+      "light",
+      "show",
+      "label",
+      "updateLight",
+      "type"
+    ],
+    "description": ""
+  },
+  "ColorSlider": {
+    "attributes": [
+      "light",
+      "show",
+      "label",
+      "updateLight",
+      "type"
+    ],
+    "description": ""
+  },
+  "controller": {
+    "attributes": [
+      "copyLight",
+      "allDevices",
+      "light",
+      "updateLight",
+      "removeLight"
+    ],
+    "description": ""
+  },
+  "Controller": {
+    "attributes": [
+      "copyLight",
+      "allDevices",
+      "light",
+      "updateLight",
+      "removeLight"
+    ],
+    "description": ""
+  },
+  "delete-button": {
+    "attributes": [],
+    "description": ""
+  },
+  "DeleteButton": {
+    "attributes": [],
+    "description": ""
+  },
+  "edit-save-buttons": {
+    "attributes": [
+      "isEditing"
+    ],
+    "description": ""
+  },
+  "EditSaveButtons": {
+    "attributes": [
+      "isEditing"
+    ],
+    "description": ""
+  },
+  "enum-card": {
+    "attributes": [
+      "enumm",
+      "removeEnum",
+      "updateEnum"
+    ],
+    "description": ""
+  },
+  "EnumCard": {
+    "attributes": [
+      "enumm",
+      "removeEnum",
+      "updateEnum"
+    ],
+    "description": ""
+  },
+  "light-card": {
+    "attributes": [
+      "copyLight",
+      "allDevices",
+      "light",
+      "updateLight",
+      "removeLight"
+    ],
+    "description": ""
+  },
+  "LightCard": {
+    "attributes": [
+      "copyLight",
+      "allDevices",
+      "light",
+      "updateLight",
+      "removeLight"
+    ],
+    "description": ""
+  },
+  "spinner": {
+    "attributes": [],
+    "description": ""
+  },
+  "Spinner": {
+    "attributes": [],
+    "description": ""
+  }
+}
