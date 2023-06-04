@@ -14,64 +14,80 @@
           @keyup.esc="handleCancelEditingClick"
           @blur="handleDoneEditingClick"
         />
-        <core-text @click.prevent="handleEditClick" v-else>{{
-          enumm.name
-        }}</core-text>
+
+        <core-text @click.prevent="handleEditClick" v-else>
+          {{ enumm.name }}
+        </core-text>
+
         <div class="ml-auto">
           <core-button
             v-if="isEditingName"
             class="mx-xxs"
             size="sm"
             @click="handleDoneEditingClick"
-            ><ion-icon name="save-outline"></ion-icon
-          ></core-button>
+          >
+            <ion-icon name="save-outline"></ion-icon>
+          </core-button>
+
           <core-button
             v-if="isEditingName"
             class="mx-xxs"
             size="sm"
             @click="handleCancelEditingClick"
-            ><ion-icon name="close-circle-outline"></ion-icon
-          ></core-button>
+          >
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </core-button>
+
           <core-button
             v-if="!isEditingName"
             class="mx-xxs"
             size="sm"
             @click.prevent="handleNewClick"
-            ><ion-icon name="add-circle-outline"></ion-icon
-          ></core-button>
+          >
+            <ion-icon name="add-circle-outline"></ion-icon>
+          </core-button>
+
           <core-button
             v-if="!isEditingName"
             class="mx-xxs"
             size="sm"
             @click.prevent="handleEditClick"
-            ><ion-icon name="create-outline"></ion-icon
-          ></core-button>
+          >
+            <ion-icon name="create-outline"></ion-icon>
+          </core-button>
+
           <core-button
             class="mx-xxs"
             variant="danger"
             size="sm"
             @click="handleRemoveEnum"
-            ><ion-icon name="trash-outline"></ion-icon
-          ></core-button>
+          >
+            <ion-icon name="trash-outline"></ion-icon>
+          </core-button>
         </div>
       </core-flex>
     </summary>
+
     <br />
+
     <core-flex direction="column">
       <div class="card-1" :key="index" v-for="(val, index) in enumm.values">
         <core-text class="enum-number-prefix">{{ index }}</core-text>
+
         <core-flex align-items="center">
           <input
-            ref="enum-value"
+            ref="enumValue"
             class="text-input"
             v-if="editIndex === index"
             v-model="tempEnumValue"
             @blur="handleDoneEditingEnumValue"
             @keyup.esc="handleCancelEditingEnumValue"
           />
-          <core-text @click.prevent="handleEditEnumValue(index)" v-else>{{
-            val
-          }}</core-text>
+
+          <core-text @click.prevent="handleEditEnumValue(index)" v-else>
+            {{ val }}
+          </core-text>
+
           <div class="ml-auto flex">
             <EditSaveButtons
               :isEditing="editIndex === index"
@@ -79,8 +95,9 @@
               @edit="handleEditEnumValue(index)"
               @cancel="handleCancelEditingEnumValue"
             ></EditSaveButtons>
+
             <delete-button
-              @on-delete="($e) => handleRemoveEnumValue(e, index)"
+              @on-delete="() => handleRemoveEnumValue(index)"
             ></delete-button>
           </div>
         </core-flex>
@@ -88,14 +105,30 @@
     </core-flex>
   </details>
 </template>
-<script>
+
+<script lang="ts">
+import { defineComponent, PropType } from "vue";
 import EditSaveButtons from "./edit-save-buttons.vue";
 import DeleteButton from "./delete-button.vue";
 
-export default {
+interface IRefs {
+  details: {
+    open: boolean;
+  };
+  enumValue: HTMLElement[];
+  name: HTMLElement;
+}
+
+interface IEnum {
+  id: string;
+  name: string;
+  values: string[];
+}
+
+export default defineComponent({
   props: {
     enumm: {
-      type: Object,
+      type: Object as PropType<IEnum>,
       required: true,
     },
     removeEnum: {
@@ -118,7 +151,7 @@ export default {
     };
   },
   methods: {
-    handleRemoveEnum(e) {
+    handleRemoveEnum(e: MouseEvent) {
       e.preventDefault();
       this.removeEnum(this.enumm.id);
     },
@@ -126,47 +159,50 @@ export default {
       this.tempName = this.enumm.name;
       this.isEditingName = true;
       this.isDetailsOpen = true;
+      type This = typeof this;
       setTimeout(
-        function () {
-          this.$refs.name.focus();
+        function (this: This) {
+          (this.$refs.name as HTMLInputElement | undefined)?.focus();
         }.bind(this),
         0
       );
     },
-    handleCancelEditingClick(e) {
+    handleCancelEditingClick(e: KeyboardEvent) {
       e.preventDefault();
       this.isEditingName = false;
     },
-    handleDoneEditingClick(e) {
+    handleDoneEditingClick(e: FocusEvent) {
       e.preventDefault();
       this.updateEnum(this.enumm.id, { name: this.tempName });
       this.isEditingName = false;
     },
-    handleNewClick(e) {
+    handleNewClick(e: MouseEvent) {
       console.log(this.$refs.details);
       if (this.$refs.details) {
         console.log("set to open");
-        this.$refs.details.open = true;
+        (this.$refs.details as HTMLDetailsElement).open = true;
       }
       e.preventDefault();
       const newIndex = this.enumm.values.length;
       this.updateEnum(this.enumm.id, { values: [...this.enumm.values, ""] });
       this.handleEditEnumValue(newIndex);
     },
-    handleRemoveEnumValue(e, index) {
+    handleRemoveEnumValue(index: number) {
       this.updateEnum(this.enumm.id, {
-        values: this.enumm.values.filter((_, i) => i !== index),
+        values: this.enumm.values.filter((_: any, i: number) => i !== index),
       });
     },
-    handleEditEnumValue(index) {
+    handleEditEnumValue(index: number) {
       this.editIndex = index;
       this.isEditingName = false;
       this.tempEnumValue = this.enumm.values[index];
       setTimeout(
         function () {
-          if (this.$refs["enum-value"]?.[0]) {
+          // @ts-ignore
+          const refs: IRefs = this.$refs;
+          if (refs.enumValue?.[0]) {
             console.log("here");
-            this.$refs["enum-value"][0].focus();
+            refs.enumValue[0].focus();
           }
         }.bind(this),
         0
@@ -184,14 +220,15 @@ export default {
       console.log("cancel");
       this.editIndex = -1;
     },
-    preventToggleDetailsOnButton(e) {
-      if (document.activeElement.nodeName.toLowerCase().includes("button")) {
+    preventToggleDetailsOnButton(e: Event) {
+      if (document?.activeElement?.nodeName.toLowerCase().includes("button")) {
         e.preventDefault();
       }
     },
   },
-};
+});
 </script>
+
 <style>
 ion-icon {
   color: white;

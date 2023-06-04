@@ -1,45 +1,77 @@
 <template>
+
   <div id="app">
+
     <core-container size="sm" center>
+
       <core-box px="lg" py="lg">
+
         <core-button @click="$router.push('/')" variant="transparent">
-          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>Back
+
+          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+           Back
         </core-button>
+
       </core-box>
+
       <core-box px="lg" pb="xl">
+
         <core-box pb="xl">
+
           <core-flex align-items="center" justify-content="between">
+
             <core-text size="xxl">Controllers</core-text>
+
             <core-toggle></core-toggle>
+
           </core-flex>
+
         </core-box>
+
         <core-box py="lg" v-if="loadingControllers || loadingLights">
+
           <core-flex justify-content="center" align-items="center">
+
             <spinner></spinner>
+
           </core-flex>
+
         </core-box>
+
         <div class="device-grid">
+
           <div :key="controller.id" v-for="controller in allControllers">
+
             <controller-card
               :allDevices="deviceOptions"
               :controller="controller"
               :removeController="removeController"
               :updateController="updateController"
             />
+
           </div>
+
           <div>
+
             <core-button
               full
               variant="primary"
               size="lg"
               @click="() => addController()"
-              >Add controller</core-button
             >
+               Add controller
+            </core-button>
+
           </div>
+
         </div>
+
       </core-box>
+
     </core-container>
+
   </div>
+
 </template>
 
 <script>
@@ -56,11 +88,11 @@ import {
   REMOVE_CONTROLLER,
 } from "../api/queries";
 import { getData, subscribeData } from "../api/getData";
-import Spinner from "../components/spinner";
-import ControllerCard from "../components/controller-card";
+import Spinner from "../components/spinner.vue";
+import ControllerCard from "../components/controller-card.vue";
 
 export default {
-  name: "Scene",
+  name: "controllers-page",
   components: { ControllerCard, Spinner },
   async created() {
     subscribeData({ query: CONTROLLER_ADDED }, ({ controllerAdded }) => {
@@ -177,3 +209,4 @@ export default {
 </script>
 
 <style></style>
+

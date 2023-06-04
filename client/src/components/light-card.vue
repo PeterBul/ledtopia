@@ -1,8 +1,13 @@
 <template>
+
   <details class="list-card">
+
     <summary>
+
       <core-flex align-items="center" justify-content="between">
+
         <core-flex align-items="center" justify-content="start">
+
           <div
             :style="{
               marginRight: 'var(--core-space-sm)',
@@ -12,9 +17,13 @@
               borderRadius: '50%',
             }"
           ></div>
+
           <core-text size="lg">{{ light.name || "Device" }}</core-text>
+
         </core-flex>
+
         <core-flex align-items="center" justify-content="end">
+
           <core-toggle
             :checked="light.state.on"
             @click.prevent
@@ -22,7 +31,9 @@
               (e) => updateLight(light.id, { state: { on: e.target.checked } })
             "
           ></core-toggle>
+
           <core-overlay position-x="right">
+
             <core-button
               variant="transparent"
               @click.prevent
@@ -30,35 +41,52 @@
               full
               tabindex="0"
             >
+
               <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+
             </core-button>
+
             <core-menu style="min-width: 150px" slot="content">
-              <core-menu-item @click.prevent="() => copyLight(light.state)"
-                >Copy</core-menu-item
-              >
+
+              <core-menu-item @click.prevent="() => copyLight(light.state)">
+                 Copy
+              </core-menu-item>
+
               <core-menu-item @click="handleRemoveLight">Delete</core-menu-item>
+
             </core-menu>
+
           </core-overlay>
+
         </core-flex>
+
       </core-flex>
+
     </summary>
 
     <core-box mt="lg">
+
       <core-label>Device</core-label>
+
       <select
         :value="light.device ? light.device && light.device.id : 'none'"
         @change="handleSelectDevice"
       >
+
         <option value="none">None</option>
+
         <option
           :disabled="device.isTaken"
           :key="i"
           :value="device.id"
           v-for="(device, i) in deviceOptions"
-          >{{ device.id }} {{ device.isTaken ? "(taken)" : "" }}
-          {{ device.isOnline ? "" : "offline" }}</option
         >
+           {{ device.id }} {{ device.isTaken ? "(taken)" : "" }} {{ device.isOnline
+          ? "" : "offline" }}
+        </option>
+
       </select>
+
     </core-box>
 
     <simple-color-settings
@@ -70,7 +98,9 @@
       @pulse-speed-change="handlePulseSpeedChange"
       @rainbow-speed-change="handleRainbowSpeedChange"
     ></simple-color-settings>
+
   </details>
+
 </template>
 
 <script>
@@ -162,3 +192,4 @@ export default {
   },
 };
 </script>
+
