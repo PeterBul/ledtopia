@@ -1,43 +1,74 @@
 <template>
+
   <div id="app">
+
     <core-container size="sm" center>
+
       <core-box px="lg" py="lg">
+
         <core-button @click="$router.push('/')" variant="transparent">
-          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>Back
+
+          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+           Back
         </core-button>
+
       </core-box>
+
       <core-box px="lg" pb="xl">
+
         <core-box pb="xl">
+
           <core-flex align-items="center" justify-content="between">
+
             <core-text size="xxl">Enums</core-text>
+
           </core-flex>
+
         </core-box>
+
         <core-box py="lg" v-if="loadingLights">
+
           <core-flex justify-content="center" align-items="center">
+
             <spinner></spinner>
+
           </core-flex>
+
         </core-box>
+
         <div class="device-grid">
+
           <div :key="enumm.id" v-for="enumm in allEnums">
+
             <enum-card
               :enumm="enumm"
               :removeEnum="removeEnum"
               :updateEnum="updateEnum"
             />
+
           </div>
+
           <div>
+
             <core-button
               full
               variant="primary"
               size="lg"
               @click="() => addEnum()"
-              >Add enum</core-button
             >
+               Add enum
+            </core-button>
+
           </div>
+
         </div>
+
       </core-box>
+
     </core-container>
+
   </div>
+
 </template>
 
 <script>
@@ -51,11 +82,11 @@ import {
   UPDATE_ENUM,
 } from "../api/queries";
 import { getData, subscribeData } from "../api/getData";
-import EnumCard from "../components/enum-card";
-import Spinner from "../components/spinner";
+import EnumCard from "../components/enum-card.vue";
+import Spinner from "../components/spinner.vue";
 
 export default {
-  name: "Enum",
+  name: "enums-page",
   components: { EnumCard, Spinner },
   async created() {
     subscribeData({ query: ENUM_ADDED }, ({ enumAdded }) => {
@@ -131,3 +162,4 @@ export default {
 </script>
 
 <style></style>
+

@@ -1,6 +1,9 @@
 <template>
+
   <core-box mt="lg" v-if="show">
+
     <core-label>{{ label }}</core-label>
+
     <input
       :class="className"
       type="range"
@@ -10,8 +13,11 @@
       :style="style"
       @input="(e) => handleInput(parseInt(e.target.value))"
     />
+
   </core-box>
+
 </template>
+
 <script>
 import convertColor from "color-convert";
 
@@ -61,3 +67,4 @@ export default {
   },
 };
 </script>
+

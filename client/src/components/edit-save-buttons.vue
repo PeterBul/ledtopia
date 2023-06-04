@@ -19,8 +19,10 @@
     ></core-button>
   </div>
 </template>
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
   props: {
     isEditing: Boolean,
   },
@@ -35,5 +37,5 @@ export default {
       this.$emit("cancel");
     },
   },
-};
+});
 </script>

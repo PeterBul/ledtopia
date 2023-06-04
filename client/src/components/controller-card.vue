@@ -1,8 +1,13 @@
 <template>
+
   <details class="list-card">
+
     <summary>
+
       <core-flex align-items="center" justify-content="between">
+
         <core-flex align-items="center" justify-content="start">
+
           <div
             :style="{
               marginRight: 'var(--core-space-sm)',
@@ -12,9 +17,13 @@
               borderRadius: '50%',
             }"
           ></div>
+
           <core-text size="lg">{{ controller.name || "Device" }}</core-text>
+
         </core-flex>
+
         <core-flex align-items="center" justify-content="end">
+
           <core-toggle
             :checked="controller.simpleState.on"
             @click.prevent
@@ -25,7 +34,9 @@
                 })
             "
           ></core-toggle>
+
           <core-overlay position-x="right">
+
             <core-button
               variant="transparent"
               @click.prevent
@@ -33,20 +44,31 @@
               full
               tabindex="0"
             >
+
               <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+
             </core-button>
+
             <core-menu style="min-width: 150px" slot="content">
-              <core-menu-item @click="handleRemoveController"
-                >Delete</core-menu-item
-              >
+
+              <core-menu-item @click="handleRemoveController">
+                 Delete
+              </core-menu-item>
+
             </core-menu>
+
           </core-overlay>
+
         </core-flex>
+
       </core-flex>
+
     </summary>
 
     <core-box mt="lg">
+
       <core-label>Control Mode</core-label>
+
       <core-tabs
         full
         class="tab-buttons"
@@ -58,9 +80,13 @@
             })
         "
       >
+
         <core-tab value="SIMPLE">Simple</core-tab>
+
         <core-tab value="ADVANCED">Advanced</core-tab>
+
       </core-tabs>
+
     </core-box>
 
     <simple-color-settings
@@ -73,7 +99,9 @@
       @pulse-speed-change="handlePulseSpeedChange"
       @rainbow-speed-change="handleRainbowSpeedChange"
     ></simple-color-settings>
+
   </details>
+
 </template>
 
 <script>
@@ -140,3 +168,4 @@ export default {
   },
 };
 </script>
+

@@ -7,7 +7,7 @@
     ><ion-icon name="trash-outline"></ion-icon
   ></core-button>
 </template>
-<script>
+<script lang="ts">
 export default {
   methods: {
     handleDelete() {

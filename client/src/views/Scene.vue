@@ -1,25 +1,47 @@
 <template>
+
   <div id="app">
+
     <core-container size="sm" center>
+
       <core-box px="lg" py="lg">
+
         <core-button @click="$router.push('/')" variant="transparent">
-          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>Back
+
+          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+           Back
         </core-button>
+
       </core-box>
+
       <core-box px="lg" pb="xl">
+
         <core-box pb="xl">
+
           <core-flex align-items="center" justify-content="between">
+
             <core-text size="xxl">My scene</core-text>
+
             <core-toggle></core-toggle>
+
           </core-flex>
+
         </core-box>
+
         <core-box py="lg" v-if="loadingLights">
+
           <core-flex justify-content="center" align-items="center">
+
             <spinner></spinner>
+
           </core-flex>
+
         </core-box>
+
         <div class="device-grid">
+
           <div :key="light.id" v-for="light in filteredLights">
+
             <light-card
               :copyLight="copyLight"
               :allDevices="deviceOptions"
@@ -27,14 +49,30 @@
               :removeLight="removeLight"
               :updateLight="updateLight"
             />
+
           </div>
+
           <div>
-            <core-button full variant="primary" size="lg" @click="() => addLight()">Add light</core-button>
+
+            <core-button
+              full
+              variant="primary"
+              size="lg"
+              @click="() => addLight()"
+            >
+               Add light
+            </core-button>
+
           </div>
+
         </div>
+
       </core-box>
+
     </core-container>
+
   </div>
+
 </template>
 
 <script>
@@ -50,11 +88,11 @@ import {
   DEVICES_UPDATED,
 } from "../api/queries";
 import { getData, subscribeData } from "../api/getData";
-import LightCard from "../components/light-card";
-import Spinner from "../components/spinner";
+import LightCard from "../components/light-card.vue";
+import Spinner from "../components/spinner.vue";
 
 export default {
-  name: "Scene",
+  name: "scenes-page",
   components: { LightCard, Spinner },
   async created() {
     subscribeData({ query: LIGHT_ADDED }, ({ lightAdded }) => {
@@ -85,7 +123,7 @@ export default {
         this.allDevices = devicesUpdated;
       }
     });
-    console.log("Getting devices")
+    console.log("Getting devices");
     this.getAllDevices();
     this.getAllLights();
   },
@@ -161,4 +199,6 @@ export default {
 </script>
 
 <style>
+
 </style>
+
