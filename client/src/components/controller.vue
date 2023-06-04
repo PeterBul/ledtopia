@@ -61,29 +61,85 @@
       </select>
     </core-box>
 
-    <simple-color-settings
-      :state="light.state"
-      @mode-change="handleModeChange"
-      @hue-change="handleHueChange"
-      @brightness-change="handleBrightnessChange"
-      @saturation-change="handleSaturationChange"
-      @pulse-speed-change="handlePulseSpeedChange"
-      @rainbow-speed-change="handleRainbowSpeedChange"
-    ></simple-color-settings>
+    <core-box mt="lg">
+      <core-label>Mode</core-label>
+      <core-tabs
+        full
+        class="tab-buttons"
+        :value="light.state.mode"
+        @change="
+          (e) => updateLight(light.id, { state: { mode: e.target.value } })
+        "
+      >
+        <core-tab value="SIMPLE">Simple</core-tab>
+        <core-tab value="PULSE">Pulse</core-tab>
+        <core-tab value="RAINBOW">Rainbow</core-tab>
+        <core-tab value="BOUNCE">Bounce</core-tab>
+      </core-tabs>
+    </core-box>
+
+    <color-slider
+      :light="light"
+      :show="showHue(light.state.mode)"
+      label="Hue"
+      :updateLight="updateHue"
+      type="hue"
+    ></color-slider>
+    <color-slider
+      :light="light"
+      :show="showSaturation(light.state.mode)"
+      label="Saturation"
+      :updateLight="updateSaturation"
+      type="saturation"
+    ></color-slider>
+    <color-slider
+      :light="light"
+      :show="showBrightness(light.state.mode)"
+      label="Brightness"
+      :updateLight="updateBrightness"
+      type="brightness"
+    ></color-slider>
+
+    <core-box mt="lg" v-if="light.state.mode === 'PULSE'">
+      <core-label>Pulse speed</core-label>
+      <input
+        class="range"
+        type="range"
+        :style="{ transform: 'rotate(180deg)' }"
+        min="10"
+        max="500"
+        :value="light.state.pulseSpeed"
+        @input="
+          (e) =>
+            updateLight(light.id, {
+              state: { pulseSpeed: parseInt(e.target.value) },
+            })
+        "
+      />
+    </core-box>
+
+    <core-box mt="lg" v-if="light.state.mode === 'RAINBOW'">
+      <core-label>Rainbow speed</core-label>
+      <input
+        class="range"
+        type="range"
+        min="0"
+        max="255"
+        :value="light.state.rainbowSpeed"
+        @input="
+          (e) =>
+            updateLight(light.id, {
+              state: { rainbowSpeed: parseInt(e.target.value) },
+            })
+        "
+      />
+    </core-box>
   </details>
 </template>
 
 <script>
 import convertColor from "color-convert";
-import SimpleColorSettings from "./simple-color-settings.vue";
-import {
-  updateHue,
-  updateBrightness,
-  updateSaturation,
-  updatePulseSpeed,
-  updateRainbowSpeed,
-  updateMode,
-} from "../utils/lights";
+import ColorSlider from "./color-slider";
 
 export default {
   props: {
@@ -93,27 +149,25 @@ export default {
     updateLight: Function,
     removeLight: Function,
   },
-  components: { SimpleColorSettings },
+  components: { ColorSlider },
   computed: {
     deviceOptions() {
-      const lightDeviceId = this.light.device?.id;
+      const lightId = this.light.device?.id;
 
-      if (!lightDeviceId)
+      if (!lightId)
         return this.allDevices.map((device) => ({ ...device, isOnline: true }));
 
-      const isOtherDevices = (device) => device.id !== lightDeviceId;
-      const otherDevices = this.allDevices
-        .filter(isOtherDevices)
+      const devices = this.allDevices
+        .filter((device) => device.id !== lightId)
         .map((device) => ({ ...device, isOnline: true }));
 
-      // This is the current light, so the device is taken, but for this light
       const light = {
         ...this.light.device,
-        isOnline: this.allDevices.some((device) => device.id === lightDeviceId),
+        isOnline: this.allDevices.some((device) => device.id === lightId),
         isTaken: false,
       };
 
-      return [...otherDevices, { ...light }];
+      return [...devices, { ...light }];
     },
   },
   methods: {
@@ -136,28 +190,34 @@ export default {
       e.preventDefault();
       this.removeLight(this.light.id);
     },
-    handleModeChange(value) {
-      updateMode(this.light.id, value);
+    showHue(mode) {
+      return mode === "SIMPLE" || mode === "PULSE";
+    },
+    showBrightness(mode) {
+      return mode === "SIMPLE";
+    },
+    showSaturation(mode) {
+      return mode === "SIMPLE" || mode === "PULSE";
     },
     getHex(h, s, v) {
       const multiplyHue = 360 / 255;
       const hex = convertColor.hsv.hex(h * multiplyHue, s, v);
       return `#${hex}`;
     },
-    handleHueChange(v) {
-      updateHue(this.light.id, v);
+    updateHue(v) {
+      this.updateLight(this.light.id, {
+        state: { hue: v },
+      });
     },
-    handleBrightnessChange(v) {
-      updateBrightness(this.light.id, v);
+    updateBrightness(v) {
+      this.updateLight(this.light.id, {
+        state: { brightness: v },
+      });
     },
-    handleSaturationChange(v) {
-      updateSaturation(this.light.id, v);
-    },
-    handlePulseSpeedChange(v) {
-      updatePulseSpeed(this.light.id, v);
-    },
-    handleRainbowSpeedChange(v) {
-      updateRainbowSpeed(this.light.id, v);
+    updateSaturation(v) {
+      this.updateLight(this.light.id, {
+        state: { saturation: v },
+      });
     },
   },
 };

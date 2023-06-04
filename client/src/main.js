@@ -9,6 +9,7 @@ Vue.use(VueRouter);
 import Home from "./views/Home.vue";
 import Scene from "./views/Scene.vue";
 import Enums from "./views/Enum.vue";
+import Controllers from "./views/Controllers.vue";
 
 Vue.config.productionTip = false;
 Vue.config.ignoredElements = [/^ion-/];
@@ -26,6 +27,10 @@ const router = new VueRouter({
     {
       path: "/enums/",
       component: Enums,
+    },
+    {
+      path: "/controllers/",
+      component: Controllers,
     },
   ],
 });

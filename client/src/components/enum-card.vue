@@ -58,7 +58,7 @@
     </summary>
     <br />
     <core-flex direction="column">
-      <div class="enum-value" :key="index" v-for="(val, index) in enumm.values">
+      <div class="card-1" :key="index" v-for="(val, index) in enumm.values">
         <core-text class="enum-number-prefix">{{ index }}</core-text>
         <core-flex align-items="center">
           <input
@@ -72,35 +72,16 @@
           <core-text @click.prevent="handleEditEnumValue(index)" v-else>{{
             val
           }}</core-text>
-          <div class="ml-auto">
-            <core-button
-              v-if="editIndex === index"
-              class="mx-xxs"
-              size="sm"
-              @click="handleDoneEditingEnumValue"
-              ><ion-icon name="save-outline"></ion-icon
-            ></core-button>
-            <core-button
-              v-if="editIndex === index"
-              class="mx-xxs"
-              size="sm"
-              @click="handleCancelEditingEnumValue"
-              ><ion-icon name="close-circle-outline"></ion-icon
-            ></core-button>
-            <core-button
-              v-else
-              class="mx-xxs"
-              size="sm"
-              @click.prevent="handleEditEnumValue(index)"
-              ><ion-icon name="create-outline"></ion-icon
-            ></core-button>
-            <core-button
-              class="mx-xxs"
-              variant="danger"
-              size="sm"
-              @click.prevent="($e) => handleRemoveEnumValue(e, index)"
-              ><ion-icon name="trash-outline"></ion-icon
-            ></core-button>
+          <div class="ml-auto flex">
+            <EditSaveButtons
+              :isEditing="editIndex === index"
+              @done="handleDoneEditingEnumValue"
+              @edit="handleEditEnumValue(index)"
+              @cancel="handleCancelEditingEnumValue"
+            ></EditSaveButtons>
+            <delete-button
+              @on-delete="($e) => handleRemoveEnumValue(e, index)"
+            ></delete-button>
           </div>
         </core-flex>
       </div>
@@ -108,6 +89,9 @@
   </details>
 </template>
 <script>
+import EditSaveButtons from "./edit-save-buttons";
+import DeleteButton from "./delete-button";
+
 export default {
   props: {
     enumm: {
@@ -123,6 +107,7 @@ export default {
       required: true,
     },
   },
+  components: { DeleteButton, EditSaveButtons },
   data() {
     return {
       isEditingName: false,

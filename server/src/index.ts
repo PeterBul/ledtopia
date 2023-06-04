@@ -12,6 +12,9 @@ import {
   ENUM_ADDED,
   ENUM_REMOVED,
   ENUM_UPDATED,
+  CONTROLLER_ADDED,
+  CONTROLLER_UPDATED,
+  CONTROLLER_REMOVED,
 } from "./utils/pubsub.js";
 
 import nanoid from "nanoid";
@@ -37,6 +40,9 @@ const typeDefs = gql`
     enumAdded: Enum
     enumRemoved: ID
     enumUpdated: Enum
+    controllerAdded: Controller
+    controllerUpdated: Controller
+    controllerRemoved: ID
   }
 
   type Query {
@@ -50,6 +56,9 @@ const typeDefs = gql`
 
     allEnums: [Enum]
     enum(id: ID!): Enum
+
+    allControllers: [Controller]
+    controller(id: ID!): Controller
   }
 
   type Mutation {
@@ -61,6 +70,9 @@ const typeDefs = gql`
     addEnum(input: EnumInput): Enum
     removeEnum(id: ID!): ID!
     updateEnum(id: ID!, input: EnumInput!): Enum
+    addController(input: ControllerInput): Controller
+    removeController(id: ID!): ID!
+    updateController(id: ID!, input: ControllerInput!): Controller
   }
 
   type Scene {
@@ -77,6 +89,21 @@ const typeDefs = gql`
     scene: Scene
     type: LightType
     state: LightState
+  }
+
+  type Controller {
+    id: ID!
+    name: String
+    device: Device
+    controlMode: ControlMode
+    """
+    The state of the light when in simple mode
+    """
+    simpleState: LightState
+    """
+    Custom fields to be used in blueprints
+    """
+    advancedFields: [CustomField]
   }
 
   type LightState {
@@ -127,11 +154,39 @@ const typeDefs = gql`
     values: [String]
   }
 
+  input ControllerInput {
+    name: String
+    deviceId: ID
+    controlMode: ControlMode
+    simpleState: LightStateInput
+    advancedFields: [CustomFieldInput]
+  }
+
+  input CustomFieldInput {
+    type: FieldType
+    value: String
+  }
+
   enum StateType {
     RAINBOW
     SIMPLE
     PULSE
     BOUNCE
+  }
+
+  enum ControlMode {
+    SIMPLE
+    ADVANCED
+  }
+
+  type CustomField {
+    type: FieldType
+    value: String
+  }
+
+  enum FieldType {
+    ENUM
+    INTEGER
   }
 
   enum LightType {
@@ -176,6 +231,18 @@ const resolvers = {
       subscribe: (root, args, { pubsub }) =>
         pubsub.asyncIterator([ENUM_UPDATED]),
     },
+    controllerAdded: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([CONTROLLER_ADDED]),
+    },
+    controllerUpdated: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([CONTROLLER_UPDATED]),
+    },
+    controllerRemoved: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([CONTROLLER_REMOVED]),
+    },
   },
   Query: {
     light: async (root, args, { db }) => {
@@ -196,6 +263,12 @@ const resolvers = {
     allEnums: async (root, args, { db }) => {
       return db.get("enums").value();
     },
+    controller: async (root, args, { db }) => {
+      return db.get("controllers").find({ id: args.id }).value();
+    },
+    allControllers: async (root, args, { db }) => {
+      return db.get("controllers").value();
+    },
   },
   Scene: {
     lights: async ({ id }, args, { db }) => {
@@ -211,6 +284,13 @@ const resolvers = {
       if (!scene) return null;
       else return scene;
     },
+    device: async ({ deviceId }) => {
+      const device = allDevices.find((device) => device.id === deviceId);
+      if (!device) return { id: deviceId };
+      else return device;
+    },
+  },
+  Controller: {
     device: async ({ deviceId }) => {
       const device = allDevices.find((device) => device.id === deviceId);
       if (!device) return { id: deviceId };
@@ -275,6 +355,27 @@ const resolvers = {
 
       return enumm;
     },
+    addController: async (root, { input }, { db, pubsub }) => {
+      const id = nanoid(10);
+
+      db.get("controllers")
+        .push({
+          id: id,
+          name: input.name || "My controller",
+          deviceId: input.deviceId || null,
+          controlMode: input.controlMode || "SIMPLE",
+          simpleState: { ...initialLightState, ...input.state },
+          advancedFields: [...(input.advancedFields || [])],
+        })
+        .write();
+
+      const controller = db.get("controllers").find({ id }).value();
+
+      pubsub.publish(CONTROLLER_ADDED, { controllerAdded: controller });
+
+      return controller;
+    },
+
     removeLight: async (root, args, { db, pubsub }) => {
       const light = db.get("lights").find({ id: args.id }).value();
 
@@ -343,6 +444,33 @@ const resolvers = {
     removeEnum: async (root, args, { db, pubsub }) => {
       db.get("enums").remove({ id: args.id }).write();
       pubsub.publish(ENUM_REMOVED, { enumRemoved: args.id });
+      return args.id;
+    },
+    updateController: async (root, { id, input }, { db, pubsub }) => {
+      const oldController = { ...db.get("controllers").find({ id }).value() };
+      const controller = db
+        .get("controllers")
+        .find({ id })
+        .assign({
+          ...oldController,
+          ...input,
+          simpleState: { ...oldController.simpleState, ...input.simpleState },
+          advancedFields: [
+            ...(input.advancedFields || [oldController.advancedFields]),
+          ],
+        })
+        .write();
+
+      if (controller.deviceId) {
+        sendState(controller.deviceId, controller.state);
+      }
+
+      pubsub.publish(CONTROLLER_UPDATED, { controllerUpdated: controller });
+      return controller;
+    },
+    removeController: async (root, args, { db, pubsub }) => {
+      db.get("controllers").remove({ id: args.id }).write();
+      pubsub.publish(CONTROLLER_REMOVED, { controllerRemoved: args.id });
       return args.id;
     },
   },
