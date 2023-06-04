@@ -89,8 +89,8 @@
   </details>
 </template>
 <script>
-import EditSaveButtons from "./edit-save-buttons";
-import DeleteButton from "./delete-button";
+import EditSaveButtons from "./edit-save-buttons.vue";
+import DeleteButton from "./delete-button.vue";
 
 export default {
   props: {
@@ -127,7 +127,7 @@ export default {
       this.isEditingName = true;
       this.isDetailsOpen = true;
       setTimeout(
-        function() {
+        function () {
           this.$refs.name.focus();
         }.bind(this),
         0
@@ -163,7 +163,7 @@ export default {
       this.isEditingName = false;
       this.tempEnumValue = this.enumm.values[index];
       setTimeout(
-        function() {
+        function () {
           if (this.$refs["enum-value"]?.[0]) {
             console.log("here");
             this.$refs["enum-value"][0].focus();
