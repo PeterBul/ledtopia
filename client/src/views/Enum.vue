@@ -1,74 +1,49 @@
 <template>
-
   <div id="app">
-
     <core-container size="sm" center>
-
       <core-box px="lg" py="lg">
-
         <core-button @click="$router.push('/')" variant="transparent">
-
           <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
-           Back
+          Back
         </core-button>
-
       </core-box>
 
       <core-box px="lg" pb="xl">
-
         <core-box pb="xl">
-
           <core-flex align-items="center" justify-content="between">
-
             <core-text size="xxl">Enums</core-text>
-
           </core-flex>
-
         </core-box>
 
-        <core-box py="lg" v-if="loadingLights">
-
+        <core-box py="lg" v-if="loadingEnums">
           <core-flex justify-content="center" align-items="center">
-
             <spinner></spinner>
-
           </core-flex>
-
         </core-box>
 
         <div class="device-grid">
-
           <div :key="enumm.id" v-for="enumm in allEnums">
-
             <enum-card
               :enumm="enumm"
               :removeEnum="removeEnum"
               :updateEnum="updateEnum"
             />
-
           </div>
 
           <div>
-
             <core-button
               full
               variant="primary"
               size="lg"
               @click="() => addEnum()"
             >
-               Add enum
+              Add enum
             </core-button>
-
           </div>
-
         </div>
-
       </core-box>
-
     </core-container>
-
   </div>
-
 </template>
 
 <script>
@@ -162,4 +137,3 @@ export default {
 </script>
 
 <style></style>
-

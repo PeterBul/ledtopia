@@ -268,6 +268,11 @@ summary {
   padding: var(--core-space-xs);
 }
 
+summary > core-flex {
+  display: inline-flex;
+  width: calc(100% - 20px);
+}
+
 details summary:focus {
   outline: 2px solid var(--core-color-primary);
 }
@@ -275,4 +280,30 @@ details summary:focus {
 
 .flex {
   display: flex;
+}
+
+core-label[left] {
+  width: unset;
+  margin-right: var(--core-space-md);
+  margin-bottom: unset;
+}
+
+core-label[size="sm"] {
+  font-size: var(--core-space-sm) 
+}
+
+core-label[size="md"] {
+  font-size: var(--core-space-md) 
+}
+
+core-label[size="lg"] {
+  font-size: var(--core-space-lg) 
+}
+
+core-box[flex] {
+  display: flex;
+}
+
+core-box[align-items="center"] {
+  align-items: center;
 }

@@ -110,6 +110,7 @@
 import { defineComponent, PropType } from "vue";
 import EditSaveButtons from "./edit-save-buttons.vue";
 import DeleteButton from "./delete-button.vue";
+import { IEnum } from "@/interfaces/IEnum";
 
 interface IRefs {
   details: {
@@ -117,12 +118,6 @@ interface IRefs {
   };
   enumValue: HTMLElement[];
   name: HTMLElement;
-}
-
-interface IEnum {
-  id: string;
-  name: string;
-  values: string[];
 }
 
 export default defineComponent({

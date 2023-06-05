@@ -1,77 +1,50 @@
 <template>
-
   <div id="app">
-
     <core-container size="sm" center>
-
       <core-box px="lg" py="lg">
-
         <core-button @click="$router.push('/')" variant="transparent">
-
           <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
-           Back
+          Back
         </core-button>
-
       </core-box>
 
       <core-box px="lg" pb="xl">
-
         <core-box pb="xl">
-
           <core-flex align-items="center" justify-content="between">
-
             <core-text size="xxl">Controllers</core-text>
-
-            <core-toggle></core-toggle>
-
           </core-flex>
-
         </core-box>
 
         <core-box py="lg" v-if="loadingControllers || loadingLights">
-
           <core-flex justify-content="center" align-items="center">
-
             <spinner></spinner>
-
           </core-flex>
-
         </core-box>
 
         <div class="device-grid">
-
           <div :key="controller.id" v-for="controller in allControllers">
-
             <controller-card
               :allDevices="deviceOptions"
               :controller="controller"
               :removeController="removeController"
               :updateController="updateController"
             />
-
           </div>
 
           <div>
-
             <core-button
               full
               variant="primary"
               size="lg"
               @click="() => addController()"
             >
-               Add controller
+              Add controller
             </core-button>
-
           </div>
-
         </div>
-
       </core-box>
-
     </core-container>
-
   </div>
-
 </template>
 
 <script>
@@ -86,6 +59,9 @@ import {
   ADD_CONTROLLER,
   UPDATE_CONTROLLER,
   REMOVE_CONTROLLER,
+  LIGHT_ADDED,
+  LIGHT_UPDATED,
+  LIGHT_REMOVED,
 } from "../api/queries";
 import { getData, subscribeData } from "../api/getData";
 import Spinner from "../components/spinner.vue";
@@ -125,9 +101,32 @@ export default {
         this.allDevices = devicesUpdated;
       }
     });
+    subscribeData({ query: LIGHT_ADDED }, ({ lightAdded }) => {
+      console.log("added");
+      if (lightAdded) {
+        this.allLights.push(lightAdded);
+      }
+    });
+
+    subscribeData({ query: LIGHT_UPDATED }, ({ lightUpdated }) => {
+      if (lightUpdated) {
+        this.allLights = this.allLights.map((light) =>
+          lightUpdated.id === light.id ? lightUpdated : light
+        );
+      }
+    });
+
+    subscribeData({ query: LIGHT_REMOVED }, ({ lightRemoved }) => {
+      if (lightRemoved) {
+        this.allLights = this.allLights.filter(
+          (light) => lightRemoved !== light.id
+        );
+      }
+    });
     console.log("Getting devices");
     this.getAllDevices();
     this.getAllControllers();
+    this.getAllLights();
   },
   data() {
     return {
@@ -209,4 +208,3 @@ export default {
 </script>
 
 <style></style>
-

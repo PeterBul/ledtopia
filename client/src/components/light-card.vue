@@ -1,13 +1,8 @@
 <template>
-
   <details class="list-card">
-
     <summary>
-
       <core-flex align-items="center" justify-content="between">
-
         <core-flex align-items="center" justify-content="start">
-
           <div
             :style="{
               marginRight: 'var(--core-space-sm)',
@@ -19,11 +14,9 @@
           ></div>
 
           <core-text size="lg">{{ light.name || "Device" }}</core-text>
-
         </core-flex>
 
         <core-flex align-items="center" justify-content="end">
-
           <core-toggle
             :checked="light.state.on"
             @click.prevent
@@ -33,7 +26,6 @@
           ></core-toggle>
 
           <core-overlay position-x="right">
-
             <core-button
               variant="transparent"
               @click.prevent
@@ -41,53 +33,26 @@
               full
               tabindex="0"
             >
-
               <ion-icon name="ellipsis-vertical-outline"></ion-icon>
-
             </core-button>
 
             <core-menu style="min-width: 150px" slot="content">
-
               <core-menu-item @click.prevent="() => copyLight(light.state)">
-                 Copy
+                Copy
               </core-menu-item>
 
               <core-menu-item @click="handleRemoveLight">Delete</core-menu-item>
-
             </core-menu>
-
           </core-overlay>
-
         </core-flex>
-
       </core-flex>
-
     </summary>
 
-    <core-box mt="lg">
-
-      <core-label>Device</core-label>
-
-      <select
-        :value="light.device ? light.device && light.device.id : 'none'"
-        @change="handleSelectDevice"
-      >
-
-        <option value="none">None</option>
-
-        <option
-          :disabled="device.isTaken"
-          :key="i"
-          :value="device.id"
-          v-for="(device, i) in deviceOptions"
-        >
-           {{ device.id }} {{ device.isTaken ? "(taken)" : "" }} {{ device.isOnline
-          ? "" : "offline" }}
-        </option>
-
-      </select>
-
-    </core-box>
+    <device-selector
+      :device="light.device"
+      :allDevices="allDevices"
+      @select-device="handleSelectDevice"
+    ></device-selector>
 
     <simple-color-settings
       :state="light.state"
@@ -98,9 +63,7 @@
       @pulse-speed-change="handlePulseSpeedChange"
       @rainbow-speed-change="handleRainbowSpeedChange"
     ></simple-color-settings>
-
   </details>
-
 </template>
 
 <script>
@@ -114,6 +77,7 @@ import {
   updateRainbowSpeed,
   updateMode,
 } from "../utils/lights";
+import DeviceSelector from "./device-selector.vue";
 
 export default {
   props: {
@@ -123,45 +87,40 @@ export default {
     updateLight: Function,
     removeLight: Function,
   },
-  components: { SimpleColorSettings },
-  computed: {
-    deviceOptions() {
-      const lightDeviceId = this.light.device?.id;
+  components: { SimpleColorSettings, DeviceSelector },
+  // computed: {
+  //   deviceOptions() {
+  //     const lightDeviceId = this.light.device?.id;
 
-      if (!lightDeviceId)
-        return this.allDevices.map((device) => ({ ...device, isOnline: true }));
+  //     if (!lightDeviceId)
+  //       return this.allDevices.map((device) => ({ ...device, isOnline: true }));
 
-      const isOtherDevices = (device) => device.id !== lightDeviceId;
-      const otherDevices = this.allDevices
-        .filter(isOtherDevices)
-        .map((device) => ({ ...device, isOnline: true }));
+  //     const isOtherDevices = (device) => device.id !== lightDeviceId;
+  //     const otherDevices = this.allDevices
+  //       .filter(isOtherDevices)
+  //       .map((device) => ({ ...device, isOnline: true }));
 
-      // This is the current light, so the device is taken, but for this light
-      const light = {
-        ...this.light.device,
-        isOnline: this.allDevices.some((device) => device.id === lightDeviceId),
-        isTaken: false,
-      };
+  //     // This is the current light, so the device is taken, but for this light
+  //     const light = {
+  //       ...this.light.device,
+  //       isOnline: this.allDevices.some((device) => device.id === lightDeviceId),
+  //       isTaken: false,
+  //     };
 
-      return [...otherDevices, { ...light }];
-    },
-  },
+  //     return [...otherDevices, { ...light }];
+  //   },
+  // },
   methods: {
-    deviceIsTaken(device) {
-      if (this.light.device && this.light.device.id === device) {
-        return false;
-      }
-      if (device.isTaken) return true;
-    },
-    handleSelectDevice(e) {
-      if (e.target.value === "none") {
+    handleSelectDevice(deviceId) {
+      if (deviceId === "none") {
         this.updateLight(this.light.id, {
           deviceId: null,
         });
       } else {
-        this.updateLight(this.light.id, { deviceId: e.target.value });
+        this.updateLight(this.light.id, { deviceId });
       }
     },
+
     handleRemoveLight(e) {
       e.preventDefault();
       this.removeLight(this.light.id);
@@ -192,4 +151,3 @@ export default {
   },
 };
 </script>
-
