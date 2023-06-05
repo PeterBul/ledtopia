@@ -1,13 +1,8 @@
 <template>
-
   <details class="list-card">
-
     <summary>
-
       <core-flex align-items="center" justify-content="between">
-
         <core-flex align-items="center" justify-content="start">
-
           <div
             :style="{
               marginRight: 'var(--core-space-sm)',
@@ -19,24 +14,16 @@
           ></div>
 
           <core-text size="lg">{{ controller.name || "Device" }}</core-text>
-
         </core-flex>
 
         <core-flex align-items="center" justify-content="end">
-
           <core-toggle
             :checked="controller.simpleState.on"
             @click.prevent
-            @change.prevent="
-              (e) =>
-                updateController(controller.id, {
-                  simpleState: { on: e.target.checked },
-                })
-            "
+            @change.prevent="handleToggleOn"
           ></core-toggle>
 
           <core-overlay position-x="right">
-
             <core-button
               variant="transparent"
               @click.prevent
@@ -44,54 +31,37 @@
               full
               tabindex="0"
             >
-
               <ion-icon name="ellipsis-vertical-outline"></ion-icon>
-
             </core-button>
 
             <core-menu style="min-width: 150px" slot="content">
-
               <core-menu-item @click="handleRemoveController">
-                 Delete
+                Delete
               </core-menu-item>
-
             </core-menu>
-
           </core-overlay>
-
         </core-flex>
-
       </core-flex>
-
     </summary>
 
     <core-box mt="lg">
-
       <core-label>Control Mode</core-label>
 
       <core-tabs
         full
         class="tab-buttons"
         :value="controller.controlMode"
-        @change="
-          (e) =>
-            updateController(controller.id, {
-              controlMode: e.target.value,
-            })
-        "
+        @change="handleChangeControlMode"
       >
-
         <core-tab value="SIMPLE">Simple</core-tab>
 
         <core-tab value="ADVANCED">Advanced</core-tab>
-
       </core-tabs>
-
     </core-box>
 
     <simple-color-settings
-      v-if="controller.controlMode === 'SIMPLE'"
-      :state="controller.simpleState"
+      v-if="controller?.controlMode === 'SIMPLE'"
+      :state="controller?.simpleState"
       @mode-change="handleModeChange"
       @hue-change="handleHueChange"
       @brightness-change="handleBrightnessChange"
@@ -100,72 +70,127 @@
       @rainbow-speed-change="handleRainbowSpeedChange"
     ></simple-color-settings>
 
+    <device-selector
+      v-if="controller?.controlMode === 'ADVANCED'"
+      :device="controller?.device"
+      :allDevices="allDevices"
+      @select-device="handleSelectDevice"
+    ></device-selector>
+    <controller-fields
+      :updateController="updateController"
+      v-if="
+        updateController && controller && controller.controlMode === 'ADVANCED'
+      "
+      :controller="controller"
+    ></controller-fields>
   </details>
-
 </template>
 
-<script>
-import convertColor from "color-convert";
+<script lang="ts">
+import convert from "color-convert";
 import SimpleColorSettings from "./simple-color-settings.vue";
+import DeviceSelector from "./device-selector.vue";
+import ControllerFields from "./controller-fields.vue";
+import { PropType, defineComponent } from "vue";
+import { IDevice } from "@/interfaces/IDevice";
+import {
+  IController,
+  IRemoveController,
+  IUpdateController,
+  isControlMode,
+} from "@/interfaces/IController";
+import { e_BaseMode } from "@/interfaces/ILight";
 
-export default {
+export default defineComponent({
   props: {
-    allDevices: Array,
-    controller: Object,
-    updateController: Function,
-    removeController: Function,
+    allDevices: Array as PropType<IDevice[]>,
+    controller: { type: Object as PropType<IController>, required: true },
+    updateController: Function as PropType<IUpdateController>,
+    removeController: Function as PropType<IRemoveController>,
   },
-  components: { SimpleColorSettings },
+  components: { ControllerFields, SimpleColorSettings, DeviceSelector },
   methods: {
-    handleRemoveController(e) {
+    handleRemoveController(e: Event) {
       e.preventDefault();
+      if (!this.controller || !this.removeController) {
+        return;
+      }
       this.removeController(this.controller.id);
     },
-    showHue(mode) {
+    showHue(mode: e_BaseMode) {
       return mode === "SIMPLE" || mode === "PULSE";
     },
-    showBrightness(mode) {
+    showBrightness(mode: e_BaseMode) {
       return mode === "SIMPLE";
     },
-    showSaturation(mode) {
+    showSaturation(mode: e_BaseMode) {
       return mode === "SIMPLE" || mode === "PULSE";
     },
-    getHex(h, s, v) {
+    getHex(h: number, s: number, v: number) {
       const multiplyHue = 360 / 255;
-      const hex = convertColor.hsv.hex(h * multiplyHue, s, v);
+      const hex = convert.hsv.hex([h * multiplyHue, s, v]);
       return `#${hex}`;
     },
-    handleModeChange(mode) {
+    handleModeChange(mode: e_BaseMode) {
+      if (!this.updateController || !this.controller) return;
       this.updateController(this.controller.id, {
         simpleState: { mode },
       });
     },
-    handleHueChange(v) {
+    handleHueChange(hue: number) {
+      if (!this.updateController || !this.controller) return;
       this.updateController(this.controller.id, {
-        simpleState: { hue: v },
+        simpleState: { hue },
       });
     },
-    handleBrightnessChange(v) {
+    handleBrightnessChange(brightness: number) {
+      if (!this.updateController || !this.controller) return;
       this.updateController(this.controller.id, {
-        simpleState: { brightness: v },
+        simpleState: { brightness },
       });
     },
-    handleSaturationChange(v) {
+    handleSaturationChange(saturation: number) {
+      if (!this.updateController || !this.controller) return;
       this.updateController(this.controller.id, {
-        simpleState: { saturation: v },
+        simpleState: { saturation },
       });
     },
-    handlePulseSpeedChange(v) {
+    handlePulseSpeedChange(pulseSpeed: number) {
+      if (!this.updateController || !this.controller) return;
       this.updateController(this.controller.id, {
-        simpleState: { pulseSpeed: v },
+        simpleState: { pulseSpeed },
       });
     },
-    handleRainbowSpeedChange(v) {
+    handleRainbowSpeedChange(rainbowSpeed: number) {
+      if (!this.updateController || !this.controller) return;
       this.updateController(this.controller.id, {
-        simpleState: { rainbowSpeed: v },
+        simpleState: { rainbowSpeed },
       });
     },
+    handleSelectDevice(deviceId: string | null) {
+      if (!this.updateController || !this.controller) return;
+      if (deviceId === "none") {
+        this.updateController(this.controller.id, {
+          deviceId,
+        });
+      } else {
+        this.updateController(this.controller.id, { deviceId });
+      }
+    },
+    handleToggleOn(e: ChangeEvent<HTMLInputElement>) {
+      if (!this.updateController) return;
+      this.updateController(this.controller.id, {
+        simpleState: { on: e.target.checked },
+      });
+    },
+    handleChangeControlMode(e: ChangeEvent<HTMLSelectElement>) {
+      if (!this.updateController || !this.controller) return;
+      if (!isControlMode(e.target.value)) return;
+      this.updateController(this.controller.id, {
+        controlMode: e.target?.value,
+      });
+    },
+    isControlMode,
   },
-};
+});
 </script>
-

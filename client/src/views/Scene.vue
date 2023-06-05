@@ -86,6 +86,10 @@ import {
   LIGHT_UPDATED,
   LIGHT_REMOVED,
   DEVICES_UPDATED,
+  CONTROLLER_ADDED,
+  CONTROLLER_UPDATED,
+  CONTROLLER_REMOVED,
+  ALL_CONTROLLERS,
 } from "../api/queries";
 import { getData, subscribeData } from "../api/getData";
 import LightCard from "../components/light-card.vue";
@@ -123,9 +127,36 @@ export default {
         this.allDevices = devicesUpdated;
       }
     });
+
+    subscribeData({ query: CONTROLLER_ADDED }, ({ controllerAdded }) => {
+      console.log("added");
+      if (controllerAdded) {
+        this.allControllers.push(controllerAdded);
+      }
+    });
+
+    subscribeData({ query: CONTROLLER_UPDATED }, ({ controllerUpdated }) => {
+      if (controllerUpdated) {
+        this.allControllers = this.allControllers.map((controller) =>
+          controllerUpdated.id === controller.id
+            ? controllerUpdated
+            : controller
+        );
+      }
+    });
+
+    subscribeData({ query: CONTROLLER_REMOVED }, ({ controllerRemoved }) => {
+      if (controllerRemoved) {
+        this.allControllers = this.allControllers.filter(
+          (controller) => controllerRemoved !== controller.id
+        );
+      }
+    });
+
     console.log("Getting devices");
     this.getAllDevices();
     this.getAllLights();
+    this.getAllControllers();
   },
   data() {
     return {
@@ -133,6 +164,8 @@ export default {
       isSearching: false,
       allLights: [],
       allDevices: [],
+      loadingControllers: false,
+      allControllers: [],
     };
   },
   computed: {
@@ -150,7 +183,10 @@ export default {
   },
   methods: {
     deviceIsTaken(id) {
-      return this.allLights.some((light) => light.device?.id === id);
+      return (
+        this.allLights.some((light) => light.device?.id === id) ||
+        this.allControllers.some((controller) => controller.device?.id === id)
+      );
     },
     copyLight(state) {
       this.addLight({ state });
@@ -168,6 +204,14 @@ export default {
       });
       this.allLights = allLights;
       this.loadingLights = false;
+    },
+    async getAllControllers() {
+      this.loadingControllers = true;
+      const { allControllers } = await getData({
+        query: ALL_CONTROLLERS,
+      });
+      this.allControllers = allControllers;
+      this.loadingControllers = false;
     },
     async addLight(input = {}) {
       await getData({

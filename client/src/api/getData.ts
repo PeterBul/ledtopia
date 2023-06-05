@@ -13,8 +13,8 @@ ws.addEventListener("open", () => {
   console.log("web socket open");
 });
 
-function waitForSocketConnection(callback) {
-  setTimeout(function() {
+function waitForSocketConnection(callback: () => void) {
+  setTimeout(function () {
     if (ws.readyState === 1) {
       console.log("Connection is made");
       callback();
@@ -24,13 +24,14 @@ function waitForSocketConnection(callback) {
   }, 5); // wait 5 milisecond for the connection...
 }
 
-export const subscribeData = ({ query, variables = {} }, callback) => {
+export const subscribeData = (
+  { query, variables = {} }: { query: any; variables?: any },
+  callback: (data: any) => void
+) => {
   waitForSocketConnection(() => {
     ws.send(
       JSON.stringify({
-        id: Math.random()
-          .toString(36)
-          .substring(7),
+        id: Math.random().toString(36).substring(7),
         type: "start",
         payload: {
           extensions: {},
@@ -46,12 +47,20 @@ export const subscribeData = ({ query, variables = {} }, callback) => {
     console.log("Received message", val);
     const res = JSON.parse(val.data);
     if (res.type === "data") {
+      // @ts-ignore
       callback(res.payload.data);
     }
   });
 };
 
-export const getData = async ({ query, variables }) => {
+// TODO: Create types for queries and variables
+export const getData = async ({
+  query,
+  variables,
+}: {
+  query: any;
+  variables?: any;
+}) => {
   try {
     const { data, errors = [] } = await fetch(API_ENDPOINT + "/graphql", {
       method: "POST",

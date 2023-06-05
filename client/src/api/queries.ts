@@ -38,6 +38,27 @@ export const ALL_LIGHTS = /* GraphQL */ `
         pulseSpeed
         rainbowSpeed
       }
+      controller {
+        id
+        name
+        device {
+          id
+        }
+        controlMode
+        simpleState {
+          mode
+          on
+          brightness
+          saturation
+          pulseSpeed
+          rainbowSpeed
+        }
+        advancedFields {
+          type
+          name
+          value
+        }
+      }
     }
   }
 `;
@@ -72,6 +93,7 @@ export const ALL_CONTROLLERS = /* GraphQL */ `
       }
       advancedFields {
         type
+        name
         value
       }
     }
@@ -168,6 +190,7 @@ export const CONTROLLER_ADDED = /* GraphQL */ `
       }
       advancedFields {
         type
+        name
         value
       }
     }
@@ -200,6 +223,7 @@ export const CONTROLLER_UPDATED = /* GraphQL */ `
       }
       advancedFields {
         type
+        name
         value
       }
     }

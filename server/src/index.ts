@@ -88,6 +88,7 @@ const typeDefs = gql`
     device: Device
     scene: Scene
     type: LightType
+    controller: Controller
     state: LightState
   }
 
@@ -131,6 +132,7 @@ const typeDefs = gql`
     name: String
     deviceId: ID
     sceneId: ID
+    controllerId: ID
     state: LightStateInput
   }
 
@@ -164,6 +166,7 @@ const typeDefs = gql`
 
   input CustomFieldInput {
     type: FieldType
+    name: String
     value: String
   }
 
@@ -181,6 +184,7 @@ const typeDefs = gql`
 
   type CustomField {
     type: FieldType
+    name: String
     value: String
   }
 
@@ -288,6 +292,15 @@ const resolvers = {
       const device = allDevices.find((device) => device.id === deviceId);
       if (!device) return { id: deviceId };
       else return device;
+    },
+    controller: async ({ controllerId }, args, { db }) => {
+      if (!controllerId) return null;
+      const controller = db
+        .get("controllers")
+        .find({ id: controllerId })
+        .value();
+      if (!controller) return null;
+      else return controller;
     },
   },
   Controller: {
@@ -456,14 +469,10 @@ const resolvers = {
           ...input,
           simpleState: { ...oldController.simpleState, ...input.simpleState },
           advancedFields: [
-            ...(input.advancedFields || [oldController.advancedFields]),
+            ...(input.advancedFields || oldController.advancedFields),
           ],
         })
         .write();
-
-      if (controller.deviceId) {
-        sendState(controller.deviceId, controller.state);
-      }
 
       pubsub.publish(CONTROLLER_UPDATED, { controllerUpdated: controller });
       return controller;
