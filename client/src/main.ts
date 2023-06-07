@@ -10,9 +10,14 @@ import Home from "./views/Home.vue";
 import Scene from "./views/Scene.vue";
 import Enums from "./views/Enum.vue";
 import Controllers from "./views/Controllers.vue";
+import BlueprintEditor from "./views/BlueprintEditor.vue";
 
 Vue.config.productionTip = false;
 Vue.config.ignoredElements = [/^ion-/];
+
+import { BaklavaVuePlugin } from "@baklavajs/plugin-renderer-vue";
+import "@baklavajs/plugin-renderer-vue/dist/styles.css";
+Vue.use(BaklavaVuePlugin);
 
 const router = new VueRouter({
   routes: [
@@ -31,6 +36,10 @@ const router = new VueRouter({
     {
       path: "/controllers/",
       component: Controllers,
+    },
+    {
+      path: "/blueprint/",
+      component: BlueprintEditor,
     },
   ],
 });

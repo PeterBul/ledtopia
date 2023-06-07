@@ -9,6 +9,7 @@
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src"
   },
   "dependencies": {
+    "baklavajs": "^1.10.2",
     "color-convert": "^2.0.0",
     "core-js": "^3.6.5",
     "lodash": "^4.17.20",

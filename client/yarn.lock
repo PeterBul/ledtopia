@@ -394,6 +394,42 @@
     "@babel/helper-validator-identifier" "^7.19.1"
     to-fast-properties "^2.0.0"
 
+"@baklavajs/core@1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/core/-/core-1.10.2.tgz#c61d14f7dffe6a2969eae6bc20891f348d759d31"
+  integrity sha512-8bqlhFJo9Zuli1DCIz41NK/eX6AAnyErKEBlamc8auEZMMlnusu8QkRuHxVXf+P7OsKKFTPHM5NGC4Ibhplbmg==
+  dependencies:
+    "@baklavajs/events" "^1.10.2"
+
+"@baklavajs/events@^1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/events/-/events-1.10.2.tgz#e24adb0b43dd3df961579174e004857829d19dfe"
+  integrity sha512-GtJdkEPdWN+NKxCTYhzpyLjAPyJLpx/hr4jASjNFtnoRFjwcHh/ZQAR5J7b/4hU0RTKjgAR/Oz71/Wlih4ry3Q==
+
+"@baklavajs/plugin-engine@1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-engine/-/plugin-engine-1.10.2.tgz#c40a9a64acef3d5522bbdce7e885e5d141a45ae4"
+  integrity sha512-kneDrfoqRq+hdHIxLNzkHh4YtU7CTzvg2lYmDne3NNCihPz+DUhu4mjq4Q+McRQrrG5WyqF9PFAyoBIibhQCFQ==
+  dependencies:
+    "@baklavajs/events" "^1.10.2"
+
+"@baklavajs/plugin-interface-types@1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-interface-types/-/plugin-interface-types-1.10.2.tgz#600a1b639931dc5516229cb435f93cf26b63f977"
+  integrity sha512-8hOsW7gxgZ7G9nOi1OtrsoeK7LTqXdlLXM8OG8/FR2A0OiwpS7eROfVxc2MX/bTY0K9ty1SnHVbC5jRnh1et5A==
+
+"@baklavajs/plugin-options-vue@1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-options-vue/-/plugin-options-vue-1.10.2.tgz#80e2f3309a35cf64f0443f2646fd26c91403b364"
+  integrity sha512-yaO5Cs0IaNB5r5FgQdGYQSAagyNsScLTkpz+lLwSidT1l0ZcKnM84e64iAPYFoZQhR8F9TkDWE8Hj69S9iraxQ==
+
+"@baklavajs/plugin-renderer-vue@1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-renderer-vue/-/plugin-renderer-vue-1.10.2.tgz#4ee5cd9056eb975a4f20750b78d26399eb58c20a"
+  integrity sha512-ehDZETbHegdLAcW7xIr8utqO5H2SK0Gd0XjnsDdT/zCnI5ilzmaQr05lfzLr01JJ+JEqrGJS5FujwTHOcXdpqA==
+  dependencies:
+    "@baklavajs/events" "^1.10.2"
+
 "@esbuild/android-arm64@0.17.19":
   version "0.17.19"
   resolved "https://registry.yarnpkg.com/@esbuild/android-arm64/-/android-arm64-0.17.19.tgz#bafb75234a5d3d1b690e7c2956a599345e84a2fd"
@@ -828,6 +864,17 @@ backo2@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/backo2/-/backo2-1.0.2.tgz#31ab1ac8b129363463e35b3ebb69f4dfcfba7947"
   integrity sha512-zj6Z6M7Eq+PBZ7PQxl5NT665MvJdAkzp0f60nAJ+sLaSCBPMwVak5ZegFbgVCzFcCJTKFoMizvM5Ld7+JrRJHA==
+
+baklavajs@^1.10.2:
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/baklavajs/-/baklavajs-1.10.2.tgz#58b2afff0da30dab8e8ddf6b01a3b4dbc94ab74f"
+  integrity sha512-UWmh/L2BTUKpSZLPKZ6vzVrQ88FjqTcQGD4oJsSuUMOykWvsc+YJe8Ik/jxF7IrHV7Iqon7+UR0Ll7BhA8AJ9w==
+  dependencies:
+    "@baklavajs/core" "1.10.2"
+    "@baklavajs/plugin-engine" "1.10.2"
+    "@baklavajs/plugin-interface-types" "1.10.2"
+    "@baklavajs/plugin-options-vue" "1.10.2"
+    "@baklavajs/plugin-renderer-vue" "1.10.2"
 
 bluebird@^3.1.1, bluebird@^3.7.2:
   version "3.7.2"
