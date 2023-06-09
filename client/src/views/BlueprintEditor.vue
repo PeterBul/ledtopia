@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { Editor, NodeBuilder } from "@baklavajs/core";
+import { Editor } from "@baklavajs/core";
 import { ViewPlugin } from "@baklavajs/plugin-renderer-vue";
 import { Engine } from "@baklavajs/plugin-engine";
 import { InterfaceTypePlugin } from "@baklavajs/plugin-interface-types";
@@ -26,6 +26,7 @@ import { IEnum } from "@/interfaces/IEnum";
 import { SwitchEnumNodeFactory } from "@/components/node/SwitchEnumNode";
 import { ColorNode } from "@/components/node/ColorNode";
 import { SelectEnumNodeFactory } from "@/components/node/SelectEnumNode";
+import { addEnumNode } from "@/components/node/utils/addEnumNode";
 export default defineComponent({
   data: () => ({
     loadingEnums: false,
@@ -69,21 +70,14 @@ export default defineComponent({
     this.intfTypePlugin.addType("number", "#FF0000");
     this.viewPlugin.registerOption("ColorOption", ColorOption);
     await this.getAllEnums();
-    this.allEnums.forEach((enumm) => {
-      const { name: selectName, node: selectNode } =
-        SelectEnumNodeFactory(enumm);
-      this.editor.registerNodeType(selectName, selectNode);
-
-      const { name: switchName, node: switchNode } =
-        SwitchEnumNodeFactory(enumm);
-      this.editor.registerNodeType(switchName, switchNode);
-    });
     // create new node
     // add node to editor
-    this.editor.registerNodeType("ColorNode", ColorNode);
-    this.editor.registerNodeType("OutputNode", OutputNode);
-    this.editor.registerNodeType("MathNode", MathNode);
     this.editor.registerNodeType("ClampNode", ClampNode);
+    this.editor.registerNodeType("ColorNode", ColorNode);
+    this.editor.registerNodeType("MathNode", MathNode);
+    this.editor.registerNodeType("OutputNode", OutputNode);
+    addEnumNode(SelectEnumNodeFactory, this.allEnums, this.editor as Editor);
+    addEnumNode(SwitchEnumNodeFactory, this.allEnums, this.editor as Editor);
 
     const node1 = this.addNodeWithCoordinates(ColorNode, 100, 140);
   },
