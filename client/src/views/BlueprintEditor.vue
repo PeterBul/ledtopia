@@ -23,8 +23,9 @@ import {
   ENUM_UPDATED,
 } from "@/api/queries";
 import { IEnum } from "@/interfaces/IEnum";
-import { PickEnumNodeFactory } from "@/components/node/PickEnumNode";
+import { SwitchEnumNodeFactory } from "@/components/node/SwitchEnumNode";
 import { ColorNode } from "@/components/node/ColorNode";
+import { SelectEnumNodeFactory } from "@/components/node/SelectEnumNode";
 export default defineComponent({
   data: () => ({
     loadingEnums: false,
@@ -69,24 +70,17 @@ export default defineComponent({
     this.viewPlugin.registerOption("ColorOption", ColorOption);
     await this.getAllEnums();
     this.allEnums.forEach((enumm) => {
-      const nodeName = `${enumm.name}Node`;
-      const EnumNode = new NodeBuilder(nodeName)
-        .addOption("Value", "SelectOption", 0, undefined, {
-          items: enumm.values.map((v, i) => ({ text: v, value: i })),
-        })
-        .addOutputInterface("Value")
-        .onCalculate((n) => {
-          n.getInterface("Value").value = n.getOptionValue("Value");
-        })
-        .build();
+      const { name: selectName, node: selectNode } =
+        SelectEnumNodeFactory(enumm);
+      this.editor.registerNodeType(selectName, selectNode);
 
-      this.editor.registerNodeType(nodeName, EnumNode);
-      const { name, node } = PickEnumNodeFactory(enumm);
-      this.editor.registerNodeType(name, node);
+      const { name: switchName, node: switchNode } =
+        SwitchEnumNodeFactory(enumm);
+      this.editor.registerNodeType(switchName, switchNode);
     });
     // create new node
     // add node to editor
-    this.editor.registerNodeType("SelectTestNode", ColorNode);
+    this.editor.registerNodeType("ColorNode", ColorNode);
     this.editor.registerNodeType("OutputNode", OutputNode);
     this.editor.registerNodeType("MathNode", MathNode);
     this.editor.registerNodeType("ClampNode", ClampNode);
