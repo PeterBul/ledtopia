@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { Editor, Node, NodeBuilder } from "@baklavajs/core";
+import { Editor, NodeBuilder } from "@baklavajs/core";
 import { ViewPlugin } from "@baklavajs/plugin-renderer-vue";
 import { Engine } from "@baklavajs/plugin-engine";
 import { InterfaceTypePlugin } from "@baklavajs/plugin-interface-types";
@@ -15,50 +15,83 @@ import { MathNode } from "@/components/node/MathNode";
 import { ClampNode } from "@/components/node/ClampNode";
 import { defineComponent } from "vue";
 import ColorOption from "@/components/baklavaOptions/ColorOption.vue";
+import { getData, subscribeData } from "@/api/getData";
+import {
+  ALL_ENUMS,
+  ENUM_ADDED,
+  ENUM_REMOVED,
+  ENUM_UPDATED,
+} from "@/api/queries";
+import { IEnum } from "@/interfaces/IEnum";
+import { PickEnumNodeFactory } from "@/components/node/PickEnumNode";
+import { ColorNode } from "@/components/node/ColorNode";
 export default defineComponent({
   data: () => ({
+    loadingEnums: false,
+    allEnums: [] as IEnum[],
     editor: new Editor(),
     viewPlugin: new ViewPlugin(),
     engine: new Engine(true),
     intfTypePlugin: new InterfaceTypePlugin(),
   }),
-  created() {
+  async created() {
+    subscribeData({ query: ENUM_ADDED }, ({ enumAdded }) => {
+      console.log("enum added");
+      if (enumAdded) {
+        this.allEnums.push(enumAdded);
+      }
+    });
+
+    subscribeData({ query: ENUM_UPDATED }, ({ enumUpdated }) => {
+      console.log("enum updated");
+      if (enumUpdated) {
+        this.allEnums = this.allEnums.map((enumm) =>
+          enumUpdated.id === enumm.id ? enumUpdated : enumm
+        );
+      }
+    });
+
+    subscribeData({ query: ENUM_REMOVED }, ({ enumRemoved }) => {
+      console.log("enum removed");
+      if (enumRemoved) {
+        this.allEnums = this.allEnums.filter(
+          (enumm) => enumRemoved !== enumm.id
+        );
+      }
+    });
+
+    console.log("Getting devices");
     this.editor.use(this.viewPlugin);
-    this.editor.use(this.engine);
     this.editor.use(new OptionPlugin());
+    this.editor.use(this.engine);
     this.editor.use(this.intfTypePlugin);
     this.intfTypePlugin.addType("number", "#FF0000");
-    this.viewPlugin.enableMinimap = true;
     this.viewPlugin.registerOption("ColorOption", ColorOption);
+    await this.getAllEnums();
+    this.allEnums.forEach((enumm) => {
+      const nodeName = `${enumm.name}Node`;
+      const EnumNode = new NodeBuilder(nodeName)
+        .addOption("Value", "SelectOption", 0, undefined, {
+          items: enumm.values.map((v, i) => ({ text: v, value: i })),
+        })
+        .addOutputInterface("Value")
+        .onCalculate((n) => {
+          n.getInterface("Value").value = n.getOptionValue("Value");
+        })
+        .build();
+
+      this.editor.registerNodeType(nodeName, EnumNode);
+      const { name, node } = PickEnumNodeFactory(enumm);
+      this.editor.registerNodeType(name, node);
+    });
     // create new node
-    const SelectTestNode = new NodeBuilder("SelectTestNode")
-      .addOption("Simple", "SelectOption", "A", undefined, {
-        items: ["A", "B", "C"],
-      })
-      .addOption("Advanced", "SelectOption", 3, undefined, {
-        items: [
-          { text: "X", value: 1 },
-          { text: "Y", value: 2 },
-          { text: "Z", value: 3 },
-        ],
-      })
-      .addOption("Color", "ColorOption", "fsdg")
-      .addOutputInterface("Simple")
-      .addOutputInterface("Advanced")
-      .addOutputInterface("Color")
-      .onCalculate((n) => {
-        n.getInterface("Simple").value = n.getOptionValue("Simple");
-        n.getInterface("Advanced").value = n.getOptionValue("Advanced");
-        n.getInterface("Color").value = n.getOptionValue("Color");
-      })
-      .build();
     // add node to editor
-    this.editor.registerNodeType("SelectTestNode", SelectTestNode);
+    this.editor.registerNodeType("SelectTestNode", ColorNode);
     this.editor.registerNodeType("OutputNode", OutputNode);
     this.editor.registerNodeType("MathNode", MathNode);
     this.editor.registerNodeType("ClampNode", ClampNode);
 
-    const node1 = this.addNodeWithCoordinates(SelectTestNode, 100, 140);
+    const node1 = this.addNodeWithCoordinates(ColorNode, 100, 140);
   },
   methods: {
     addNodeWithCoordinates(nodeType: any, x: number, y: number) {
@@ -67,6 +100,12 @@ export default defineComponent({
       n.position.x = x;
       n.position.y = y;
       return n;
+    },
+    async getAllEnums() {
+      const { allEnums } = await getData({
+        query: ALL_ENUMS,
+      });
+      this.allEnums = allEnums;
     },
   },
 });

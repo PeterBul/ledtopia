@@ -15,12 +15,16 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component
-export default class InputOption extends Vue {
+export default class ColorOption extends Vue {
   @Prop({ type: String, default: "" })
   value!: string;
 
   @Prop({ type: String })
   name!: string;
+
+  get v() {
+    return this.value;
+  }
 
   get listeners(): any {
     return {
