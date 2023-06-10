@@ -17,16 +17,23 @@ import { defineComponent } from "vue";
 import ColorOption from "@/components/baklavaOptions/ColorOption.vue";
 import { getData, subscribeData } from "@/api/getData";
 import {
+  ALL_CONTROLLERS,
   ALL_ENUMS,
+  CONTROLLER_ADDED,
+  CONTROLLER_REMOVED,
+  CONTROLLER_UPDATED,
   ENUM_ADDED,
   ENUM_REMOVED,
   ENUM_UPDATED,
 } from "@/api/queries";
 import { IEnum } from "@/interfaces/IEnum";
 import { SwitchEnumNodeFactory } from "@/components/node/SwitchEnumNode";
+import { ControllerNodeFactory } from "@/components/node/ControllerNode";
 import { ColorNode } from "@/components/node/ColorNode";
 import { SelectEnumNodeFactory } from "@/components/node/SelectEnumNode";
-import { addEnumNode } from "@/components/node/utils/addEnumNode";
+import { addEnumNodes } from "@/components/node/utils/addEnumNodes";
+import { IController } from "@/interfaces/IController";
+import { addControllerNodes } from "@/components/node/utils/addControllerNodes";
 export default defineComponent({
   data: () => ({
     loadingEnums: false,
@@ -35,8 +42,35 @@ export default defineComponent({
     viewPlugin: new ViewPlugin(),
     engine: new Engine(true),
     intfTypePlugin: new InterfaceTypePlugin(),
+    loadingControllers: false,
+    allControllers: [] as IController[],
   }),
   async created() {
+    subscribeData({ query: CONTROLLER_ADDED }, ({ controllerAdded }) => {
+      console.log("added");
+      if (controllerAdded) {
+        this.allControllers.push(controllerAdded);
+      }
+    });
+
+    subscribeData({ query: CONTROLLER_UPDATED }, ({ controllerUpdated }) => {
+      if (controllerUpdated) {
+        this.allControllers = this.allControllers.map((controller) =>
+          controllerUpdated.id === controller.id
+            ? controllerUpdated
+            : controller
+        );
+      }
+    });
+
+    subscribeData({ query: CONTROLLER_REMOVED }, ({ controllerRemoved }) => {
+      if (controllerRemoved) {
+        this.allControllers = this.allControllers.filter(
+          (controller) => controllerRemoved !== controller.id
+        );
+      }
+    });
+
     subscribeData({ query: ENUM_ADDED }, ({ enumAdded }) => {
       console.log("enum added");
       if (enumAdded) {
@@ -70,14 +104,21 @@ export default defineComponent({
     this.intfTypePlugin.addType("number", "#FF0000");
     this.viewPlugin.registerOption("ColorOption", ColorOption);
     await this.getAllEnums();
+    await this.getAllControllers();
     // create new node
     // add node to editor
-    this.editor.registerNodeType("ClampNode", ClampNode);
-    this.editor.registerNodeType("ColorNode", ColorNode);
-    this.editor.registerNodeType("MathNode", MathNode);
-    this.editor.registerNodeType("OutputNode", OutputNode);
-    addEnumNode(SelectEnumNodeFactory, this.allEnums, this.editor as Editor);
-    addEnumNode(SwitchEnumNodeFactory, this.allEnums, this.editor as Editor);
+    this.editor.registerNodeType("Clamp", ClampNode);
+    addControllerNodes(
+      ControllerNodeFactory,
+      this.allControllers,
+      this.allEnums,
+      this.editor as Editor
+    );
+    this.editor.registerNodeType("Color", ColorNode);
+    this.editor.registerNodeType("Math", MathNode);
+    this.editor.registerNodeType("Output", OutputNode);
+    addEnumNodes(SelectEnumNodeFactory, this.allEnums, this.editor as Editor);
+    addEnumNodes(SwitchEnumNodeFactory, this.allEnums, this.editor as Editor);
 
     const node1 = this.addNodeWithCoordinates(ColorNode, 100, 140);
   },
@@ -94,6 +135,14 @@ export default defineComponent({
         query: ALL_ENUMS,
       });
       this.allEnums = allEnums;
+    },
+    async getAllControllers() {
+      this.loadingControllers = true;
+      const { allControllers } = await getData({
+        query: ALL_CONTROLLERS,
+      });
+      this.allControllers = allControllers;
+      this.loadingControllers = false;
     },
   },
 });

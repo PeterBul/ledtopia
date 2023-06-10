@@ -1,7 +1,7 @@
 import { IEnum } from "@/interfaces/IEnum";
 import type { Editor, NodeBuilder } from "@baklavajs/core";
 
-export function addEnumNode(
+export function addEnumNodes(
   enumNodeFactory: (enumm: IEnum) => {
     name: string;
     node: ReturnType<NodeBuilder["build"]>;
