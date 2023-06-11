@@ -7,7 +7,16 @@
             <core-text size="md">LEDTOPIA</core-text>
           </router-link>
         </core-box>
-        <core-box px="lg" py="xl" style="{margin-left: auto; width: unset;}">
+        <core-box
+          px="lg"
+          py="xl"
+          style="
+             {
+              margin-left: auto;
+              width: unset;
+            }
+          "
+        >
           <core-overlay position-x="right">
             <core-button
               variant="transparent"
@@ -27,6 +36,11 @@
               <router-link to="/controllers">
                 <core-menu-item>
                   <core-text size="md">Controllers</core-text>
+                </core-menu-item>
+              </router-link>
+              <router-link to="/blueprint">
+                <core-menu-item>
+                  <core-text size="md">Blueprint</core-text>
                 </core-menu-item>
               </router-link>
             </core-menu>

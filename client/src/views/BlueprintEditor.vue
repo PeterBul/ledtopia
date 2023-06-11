@@ -34,6 +34,7 @@ import { SelectEnumNodeFactory } from "@/components/node/SelectEnumNode";
 import { addEnumNodes } from "@/components/node/utils/addEnumNodes";
 import { IController } from "@/interfaces/IController";
 import { addControllerNodes } from "@/components/node/utils/addControllerNodes";
+import { ColorConversionNode } from "@/components/node/ColorConversionNode";
 export default defineComponent({
   data: () => ({
     loadingEnums: false,
@@ -115,6 +116,7 @@ export default defineComponent({
       this.editor as Editor
     );
     this.editor.registerNodeType("Color", ColorNode);
+    this.editor.registerNodeType("Color Conversion", ColorConversionNode);
     this.editor.registerNodeType("Math", MathNode);
     this.editor.registerNodeType("Output", OutputNode);
     addEnumNodes(SelectEnumNodeFactory, this.allEnums, this.editor as Editor);
