@@ -6,6 +6,7 @@ import { ILight } from "../interfaces/ILight.js";
 interface IDatabase {
   lights: ILight[];
   enums: IEnum[];
+  flows: { id: string; name?: string; data: Object | null };
 }
 
 interface IEnum {
@@ -24,5 +25,6 @@ database
     scenes: [],
     controllers: [],
     enums: [],
+    flows: [],
   })
   .write();

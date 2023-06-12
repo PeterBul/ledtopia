@@ -2,7 +2,7 @@
   "name": "pi",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "type": "module",
   "scripts": {
     "start": "nodemon --ignore 'db.json'",
@@ -20,6 +20,7 @@
     "arpscan": "^1.0.2",
     "express": "^4.17.1",
     "graphql": "^15.4.0",
+    "graphql-type-json": "^0.3.2",
     "is-port-reachable": "^3.0.0",
     "is-reachable": "^5.0.0",
     "lowdb": "^1.0.0",

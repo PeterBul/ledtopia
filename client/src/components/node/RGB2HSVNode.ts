@@ -55,11 +55,7 @@ export class ColorConversionNode extends Node {
   }
 
   public load(state: INodeState) {
-    state.interfaces.forEach(([name, intfState]) => {
-      const intf = this.addInputInterface(name);
-      intf!.id = intfState.id;
-    });
-    super.load(state);
+    // TODO: Probably have to implement
   }
 
   public calculate() {

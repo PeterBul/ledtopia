@@ -100,6 +100,73 @@ export const ALL_CONTROLLERS = /* GraphQL */ `
   }
 `;
 
+export const ALL_FLOWS = /* GraphQL */ `
+  query {
+    allFlows {
+      id
+      name
+    }
+  }
+`;
+
+export const FLOW = /* GraphQL */ `
+  query Flow($id: ID!) {
+    flow(id: $id) {
+      id
+      name
+      data
+    }
+  }
+`;
+
+export const ADD_FLOW = /* GraphQL */ `
+  mutation AddFlow($input: FlowInput) {
+    addFlow(input: $input) {
+      id
+    }
+  }
+`;
+
+export const UPDATE_FLOW = /* GraphQL */ `
+  mutation UpdateFlow($id: ID!, $input: FlowInput!) {
+    updateFlow(id: $id, input: $input) {
+      id
+    }
+  }
+`;
+
+export const REMOVE_FLOW = /* GraphQL */ `
+  mutation RemoveFlow($id: ID!) {
+    removeFlow(id: $id)
+  }
+`;
+
+export const FLOW_ADDED = /* GraphQL */ `
+  subscription FlowAdded {
+    flowAdded {
+      id
+      name
+      data
+    }
+  }
+`;
+
+export const FLOW_UPDATED = /* GraphQL */ `
+  subscription FlowUpdated {
+    flowUpdated {
+      id
+      name
+      data
+    }
+  }
+`;
+
+export const FLOW_REMOVED = /* GraphQL */ `
+  subscription FlowRemoved {
+    flowRemoved
+  }
+`;
+
 export const UPDATE_ENUM = /* GraphQL */ `
   mutation UpdateEnum($id: ID!, $input: EnumInput!) {
     updateEnum(id: $id, input: $input) {

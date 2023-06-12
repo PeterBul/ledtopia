@@ -10,7 +10,8 @@ import Home from "./views/Home.vue";
 import Scene from "./views/Scene.vue";
 import Enums from "./views/Enum.vue";
 import Controllers from "./views/Controllers.vue";
-import BlueprintEditor from "./views/BlueprintEditor.vue";
+import FlowEditor from "./views/FlowEditor.vue";
+import Flows from "./views/Flows.vue";
 
 Vue.config.productionTip = false;
 Vue.config.ignoredElements = [/^ion-/];
@@ -38,8 +39,12 @@ const router = new VueRouter({
       component: Controllers,
     },
     {
-      path: "/blueprint/",
-      component: BlueprintEditor,
+      path: "/flow/",
+      component: Flows,
+    },
+    {
+      path: "/flow/:id",
+      component: FlowEditor,
     },
   ],
 });

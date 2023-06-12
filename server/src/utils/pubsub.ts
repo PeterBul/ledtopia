@@ -15,6 +15,10 @@ export const CONTROLLER_ADDED = "CONTROLLER_ADDED";
 export const CONTROLLER_REMOVED = "CONTROLLER_REMOVED";
 export const CONTROLLER_UPDATED = "CONTROLLER_UPDATED";
 
+export const FLOW_ADDED = "FLOW_ADDED";
+export const FLOW_REMOVED = "FLOW_REMOVED";
+export const FLOW_UPDATED = "FLOW_UPDATED";
+
 const pub = new PubSub();
 
 export const pubsub = pub;

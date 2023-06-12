@@ -1,4 +1,5 @@
 import { ApolloServer, gql } from "apollo-server";
+import GraphQLJSON from "graphql-type-json";
 import { database } from "./utils/db.js";
 import { sendState, allDevices } from "./utils/devices.js";
 import {
@@ -15,9 +16,13 @@ import {
   CONTROLLER_ADDED,
   CONTROLLER_UPDATED,
   CONTROLLER_REMOVED,
+  FLOW_ADDED,
+  FLOW_UPDATED,
+  FLOW_REMOVED,
 } from "./utils/pubsub.js";
 
 import nanoid from "nanoid";
+import { IResolvers } from "graphql-tools";
 
 const initialLightState = {
   mode: "SIMPLE",
@@ -30,6 +35,8 @@ const initialLightState = {
 };
 
 const typeDefs = gql`
+  scalar JSON
+
   type Subscription {
     sceneAdded: Scene
     sceneRemoved: ID
@@ -43,6 +50,9 @@ const typeDefs = gql`
     controllerAdded: Controller
     controllerUpdated: Controller
     controllerRemoved: ID
+    flowAdded: Flow
+    flowUpdated: Flow
+    flowRemoved: ID
   }
 
   type Query {
@@ -59,6 +69,9 @@ const typeDefs = gql`
 
     allControllers: [Controller]
     controller(id: ID!): Controller
+
+    allFlows: [Flow]
+    flow(id: ID!): Flow
   }
 
   type Mutation {
@@ -73,6 +86,9 @@ const typeDefs = gql`
     addController(input: ControllerInput): Controller
     removeController(id: ID!): ID!
     updateController(id: ID!, input: ControllerInput!): Controller
+    addFlow(input: FlowInput): Flow
+    removeFlow(id: ID!): ID!
+    updateFlow(id: ID!, input: FlowInput!): Flow
   }
 
   type Scene {
@@ -102,7 +118,7 @@ const typeDefs = gql`
     """
     simpleState: LightState
     """
-    Custom fields to be used in blueprints
+    Custom fields to be used in flows
     """
     advancedFields: [CustomField]
   }
@@ -126,6 +142,12 @@ const typeDefs = gql`
     id: ID!
     name: String
     values: [String]
+  }
+
+  type Flow {
+    id: ID!
+    name: String
+    data: JSON
   }
 
   input LightInput {
@@ -170,6 +192,11 @@ const typeDefs = gql`
     value: String
   }
 
+  input FlowInput {
+    name: String
+    data: JSON
+  }
+
   enum StateType {
     RAINBOW
     SIMPLE
@@ -198,7 +225,8 @@ const typeDefs = gql`
   }
 `;
 
-const resolvers = {
+const resolvers: IResolvers = {
+  JSON: GraphQLJSON,
   Subscription: {
     sceneAdded: {
       subscribe: (root, args, { pubsub }) =>
@@ -247,6 +275,17 @@ const resolvers = {
       subscribe: (root, args, { pubsub }) =>
         pubsub.asyncIterator([CONTROLLER_REMOVED]),
     },
+    flowAdded: {
+      subscribe: (root, args, { pubsub }) => pubsub.asyncIterator([FLOW_ADDED]),
+    },
+    flowUpdated: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([FLOW_UPDATED]),
+    },
+    flowRemoved: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator([FLOW_REMOVED]),
+    },
   },
   Query: {
     light: async (root, args, { db }) => {
@@ -272,6 +311,12 @@ const resolvers = {
     },
     allControllers: async (root, args, { db }) => {
       return db.get("controllers").value();
+    },
+    flow: async (root, args, { db }) => {
+      return db.get("flows").find({ id: args.id }).value();
+    },
+    allFlows: async (root, args, { db }) => {
+      return db.get("flows").value();
     },
   },
   Scene: {
@@ -388,6 +433,23 @@ const resolvers = {
 
       return controller;
     },
+    addFlow: async (root, { input }, { db, pubsub }) => {
+      const id = nanoid(10);
+
+      db.get("flows")
+        .push({
+          id: id,
+          name: input.name || "My flow",
+          data: input.data || null,
+        })
+        .write();
+
+      const flow = db.get("flows").find({ id }).value();
+
+      pubsub.publish(FLOW_ADDED, { flowAdded: flow });
+
+      return flow;
+    },
 
     removeLight: async (root, args, { db, pubsub }) => {
       const light = db.get("lights").find({ id: args.id }).value();
@@ -399,6 +461,14 @@ const resolvers = {
       pubsub.publish(LIGHT_REMOVED, { lightRemoved: args.id });
 
       db.get("lights").remove({ id: args.id }).write();
+      return args.id;
+    },
+
+    removeFlow: async (root, args, { db, pubsub }) => {
+      db.get("flows").remove({ id: args.id }).write();
+
+      pubsub.publish(FLOW_REMOVED, { flowRemoved: args.id });
+
       return args.id;
     },
     updateLight: async (root, { id, input }, { db, pubsub }) => {
@@ -424,6 +494,20 @@ const resolvers = {
       pubsub.publish(LIGHT_UPDATED, { lightUpdated: light });
 
       return light;
+    },
+    updateFlow: async (root, { id, input }, { db, pubsub }) => {
+      const oldFlow = { ...db.get("flows").find({ id }).value() };
+      console.log("oldFlow", oldFlow);
+      const newFlow = {
+        ...oldFlow,
+        ...input,
+      };
+      console.log("newFlow", newFlow);
+      const flow = db.get("flows").find({ id }).assign(newFlow).write();
+
+      pubsub.publish(FLOW_UPDATED, { flowUpdated: flow });
+
+      return flow;
     },
     updateEnum: async (root, { id, input }, { db, pubsub }) => {
       const oldEnum = { ...db.get("enums").find({ id }).value() };

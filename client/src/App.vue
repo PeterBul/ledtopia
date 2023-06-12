@@ -38,9 +38,9 @@
                   <core-text size="md">Controllers</core-text>
                 </core-menu-item>
               </router-link>
-              <router-link to="/blueprint">
+              <router-link to="/flow">
                 <core-menu-item>
-                  <core-text size="md">Blueprint</core-text>
+                  <core-text size="md">Flows</core-text>
                 </core-menu-item>
               </router-link>
             </core-menu>

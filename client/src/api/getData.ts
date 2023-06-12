@@ -62,6 +62,7 @@ export const getData = async ({
   variables?: any;
 }) => {
   try {
+    console.log(query, variables);
     const { data, errors = [] } = await fetch(API_ENDPOINT + "/graphql", {
       method: "POST",
       headers: {

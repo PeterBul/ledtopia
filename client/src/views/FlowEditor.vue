@@ -1,6 +1,21 @@
 <template>
-  <div class="blueprint-editor">
-    <baklava-editor :plugin="viewPlugin"></baklava-editor>
+  <div>
+    <core-container size="sm" center>
+      <core-box px="lg" py="lg">
+        <core-button @click="$router.push('/flow')" variant="transparent">
+          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+          Back
+        </core-button>
+      </core-box>
+    </core-container>
+    <div class="flow-editor-buttons">
+      <core-button class="mx-xxs" size="sm" @click="updateFlow"
+        ><ion-icon name="save-outline"></ion-icon
+      ></core-button>
+    </div>
+    <div class="flow-editor">
+      <baklava-editor :plugin="viewPlugin"></baklava-editor>
+    </div>
   </div>
 </template>
 
@@ -25,6 +40,8 @@ import {
   ENUM_ADDED,
   ENUM_REMOVED,
   ENUM_UPDATED,
+  FLOW,
+  UPDATE_FLOW,
 } from "@/api/queries";
 import { IEnum } from "@/interfaces/IEnum";
 import { SwitchEnumNodeFactory } from "@/components/node/SwitchEnumNode";
@@ -116,15 +133,15 @@ export default defineComponent({
       this.allEnums,
       this.editor as Editor
     );
-    this.editor.registerNodeType("Color", ColorNode);
-    this.editor.registerNodeType("Color Conversion", ColorConversionNode);
-    this.editor.registerNodeType("Light", LightNode);
-    this.editor.registerNodeType("Math", MathNode);
-    this.editor.registerNodeType("Output", OutputNode);
+    this.editor.registerNodeType("ColorNode", ColorNode);
+    this.editor.registerNodeType("ColorConversionNode", ColorConversionNode);
+    this.editor.registerNodeType("LightNode", LightNode);
+    this.editor.registerNodeType("MathNode", MathNode);
+    this.editor.registerNodeType("OutputNode", OutputNode);
     addEnumNodes(SelectEnumNodeFactory, this.allEnums, this.editor as Editor);
     addEnumNodes(SwitchEnumNodeFactory, this.allEnums, this.editor as Editor);
 
-    const node1 = this.addNodeWithCoordinates(ColorNode, 100, 140);
+    await this.getFlow();
   },
   methods: {
     addNodeWithCoordinates(nodeType: any, x: number, y: number) {
@@ -148,13 +165,47 @@ export default defineComponent({
       this.allControllers = allControllers;
       this.loadingControllers = false;
     },
+    async getFlow() {
+      const { flow } = await getData({
+        query: FLOW,
+        variables: {
+          id: this.flowId,
+        },
+      });
+      setTimeout(() => {
+        console.log("load warnings", this.editor.load(flow.data));
+      }, 1000);
+    },
+    async updateFlow() {
+      const flow = this.editor.save();
+      await getData({
+        query: UPDATE_FLOW,
+        variables: {
+          id: this.flowId,
+          input: { data: flow },
+        },
+      });
+    },
+  },
+  computed: {
+    flowId() {
+      return this.$route.params.id;
+    },
   },
 });
 </script>
 <style>
-.blueprint-editor {
+.flow-editor {
   width: 90vw;
   height: 90vh;
   margin: 0px auto;
+}
+
+.flow-editor-buttons {
+  width: 90vw;
+  margin: 0px auto;
+  display: flex;
+  flex-direction: row-reverse;
+  margin-bottom: var(--core-space-xs);
 }
 </style>

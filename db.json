@@ -3,5 +3,12 @@
   "devices": {},
   "scenes": [],
   "controllers": [],
-  "enums": []
+  "enums": [
+    {
+      "id": "5--nHX3rY1",
+      "name": "My enum",
+      "values": []
+    }
+  ],
+  "flows": []
 }
