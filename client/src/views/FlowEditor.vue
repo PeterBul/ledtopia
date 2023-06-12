@@ -1,17 +1,13 @@
 <template>
   <div>
-    <core-container size="sm" center>
-      <core-box px="lg" py="lg">
-        <core-button @click="$router.push('/flow')" variant="transparent">
-          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
-          Back
-        </core-button>
-      </core-box>
-    </core-container>
     <div class="flow-editor-buttons">
       <core-button class="mx-xxs" size="sm" @click="updateFlow"
         ><ion-icon name="save-outline"></ion-icon
       ></core-button>
+      <core-button @click="$router.push('/flow')" variant="transparent">
+        <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+        Back
+      </core-button>
     </div>
     <div class="flow-editor">
       <baklava-editor :plugin="viewPlugin"></baklava-editor>
@@ -172,9 +168,7 @@ export default defineComponent({
           id: this.flowId,
         },
       });
-      setTimeout(() => {
-        console.log("load warnings", this.editor.load(flow.data));
-      }, 1000);
+      console.log("load warnings", this.editor.load(flow.data));
     },
     async updateFlow() {
       const flow = this.editor.save();
@@ -197,7 +191,7 @@ export default defineComponent({
 <style>
 .flow-editor {
   width: 90vw;
-  height: 90vh;
+  height: calc(90vh - 100px);
   margin: 0px auto;
 }
 
@@ -207,5 +201,6 @@ export default defineComponent({
   display: flex;
   flex-direction: row-reverse;
   margin-bottom: var(--core-space-xs);
+  justify-content: space-between;
 }
 </style>

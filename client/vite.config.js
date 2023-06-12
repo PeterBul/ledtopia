@@ -14,6 +14,11 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(_dirname, "./src"),
+      vue: path.resolve(
+        __dirname,
+        "./node_modules/vue/dist/vue.runtime.esm.js"
+      ),
     },
+    dedupe: ["vuetify", "vue"],
   },
 });
