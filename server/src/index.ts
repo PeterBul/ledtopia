@@ -106,6 +106,8 @@ const typeDefs = gql`
     type: LightType
     controller: Controller
     state: LightState
+    controlMode: ControlMode
+    flow: Flow
   }
 
   type Controller {
@@ -156,6 +158,8 @@ const typeDefs = gql`
     sceneId: ID
     controllerId: ID
     state: LightStateInput
+    controlMode: ControlMode
+    flowId: ID
   }
 
   input SceneInput {
@@ -347,6 +351,12 @@ const resolvers: IResolvers = {
       if (!controller) return null;
       else return controller;
     },
+    flow: async ({ flowId }, args, { db }) => {
+      if (!flowId) return null;
+      const flow = db.get("flows").find({ id: flowId }).value();
+      if (!flow) return null;
+      else return flow;
+    },
   },
   Controller: {
     device: async ({ deviceId }) => {
@@ -380,6 +390,8 @@ const resolvers: IResolvers = {
           id: id,
           sceneId: input.sceneId || null,
           deviceId: input.deviceId || null,
+          flowId: input.flowId || null,
+          controlMode: input.controlMode || "SIMPLE",
           name: input.name || "My light",
           type: "LED_STRIP",
           state: { ...initialLightState, ...input.state },

@@ -23,6 +23,7 @@ export const ALL_LIGHTS = /* GraphQL */ `
     allLights {
       id
       name
+      controlMode
       device {
         id
       }
@@ -58,6 +59,9 @@ export const ALL_LIGHTS = /* GraphQL */ `
           name
           value
         }
+      }
+      flow {
+        id
       }
     }
   }
@@ -356,6 +360,7 @@ export const LIGHT_ADDED = /* GraphQL */ `
     lightAdded {
       id
       name
+      controlMode
       device {
         id
       }
@@ -370,6 +375,9 @@ export const LIGHT_ADDED = /* GraphQL */ `
         hue
         pulseSpeed
         rainbowSpeed
+      }
+      flow {
+        id
       }
     }
   }
@@ -380,6 +388,7 @@ export const LIGHT_UPDATED = /* GraphQL */ `
     lightUpdated {
       id
       name
+      controlMode
       device {
         id
       }
@@ -394,6 +403,9 @@ export const LIGHT_UPDATED = /* GraphQL */ `
         hue
         pulseSpeed
         rainbowSpeed
+      }
+      flow {
+        id
       }
     }
   }

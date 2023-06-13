@@ -26,6 +26,7 @@
         <div class="device-grid">
           <div :key="light.id" v-for="light in filteredLights">
             <light-card
+              :allFlows="allFlows"
               :copyLight="copyLight"
               :allDevices="deviceOptions"
               :light="light"
@@ -65,6 +66,10 @@ import {
   CONTROLLER_UPDATED,
   CONTROLLER_REMOVED,
   ALL_CONTROLLERS,
+  ALL_FLOWS,
+  FLOW_ADDED,
+  FLOW_UPDATED,
+  FLOW_REMOVED,
 } from "../api/queries";
 import { getData, subscribeData } from "../api/getData";
 import LightCard from "../components/light-card.vue";
@@ -94,6 +99,27 @@ export default {
         this.allLights = this.allLights.filter(
           (light) => lightRemoved !== light.id
         );
+      }
+    });
+
+    subscribeData({ query: FLOW_ADDED }, ({ flowAdded }) => {
+      console.log("added");
+      if (flowAdded) {
+        this.allFlows.push(flowAdded);
+      }
+    });
+
+    subscribeData({ query: FLOW_UPDATED }, ({ flowUpdated }) => {
+      if (flowUpdated) {
+        this.allFlows = this.allFlows.map((flow) =>
+          flowUpdated.id === flow.id ? flowUpdated : flow
+        );
+      }
+    });
+
+    subscribeData({ query: FLOW_REMOVED }, ({ flowRemoved }) => {
+      if (flowRemoved) {
+        this.allFlows = this.allFlows.filter((flow) => flowRemoved !== flow.id);
       }
     });
 
@@ -132,6 +158,7 @@ export default {
     this.getAllDevices();
     this.getAllLights();
     this.getAllControllers();
+    this.getAllFlows();
   },
   data() {
     return {
@@ -141,6 +168,8 @@ export default {
       allDevices: [],
       loadingControllers: false,
       allControllers: [],
+      allFlows: [],
+      loadingFlows: false,
     };
   },
   computed: {
@@ -187,6 +216,14 @@ export default {
       });
       this.allControllers = allControllers;
       this.loadingControllers = false;
+    },
+    async getAllFlows() {
+      this.loadingFlows = true;
+      const { allFlows } = await getData({
+        query: ALL_FLOWS,
+      });
+      this.allFlows = allFlows;
+      this.loadingFlows = false;
     },
     async addLight(input = {}) {
       await getData({

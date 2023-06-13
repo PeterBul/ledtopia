@@ -1,3 +1,5 @@
+import { IController, e_ControlMode } from "./IController";
+
 const e_LightType = {
   LED_STRIP: "LED_STRIP",
 } as const;
@@ -34,13 +36,37 @@ export interface ILightState {
   rainbowSpeed: number; // 0 - 65 535
 }
 
+export interface ILightInput {
+  name: string;
+  flowId: string | null;
+  deviceId: string | null;
+  controlMode: e_ControlMode;
+  sceneId: string | null;
+  controllerId: string | null;
+  state: ILightStateInput;
+}
+
 export type ILightStateInput = ILightState;
 
 export interface ILight {
   id: string;
   name: string;
-  sceneId: string;
-  deviceId: string;
+  controlMode: e_ControlMode;
+  flow: ID | null;
+  scene: ID | null;
+  device: ID | null;
   type: e_LightType;
   state: ILightState;
+  controller: IController | null;
 }
+
+export interface ID {
+  id: string | null;
+}
+
+export type IUpdateLight = (
+  lightId: string,
+  light: RecursivePartial<ILightInput>
+) => void;
+
+export type IRemoveLight = (lightId: string) => void;
