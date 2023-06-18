@@ -103,9 +103,12 @@ class FlowService {
     });
   }
 
-  removeControllerNode(controller: IController) {
+  rebuildFlowsContainingController(controller: IController) {
+    console.log("Rebuilding flows containing controller", controller);
     Object.values(this.flows).forEach((flow) => {
-      flow.removeControllerNode(controller);
+      if (flow.hasControllerNode(controller)) {
+        flow.rebuildEditor();
+      }
     });
   }
 }

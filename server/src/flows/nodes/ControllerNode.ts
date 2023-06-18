@@ -17,7 +17,6 @@ export const ControllerNodeFactory = (
   const typeName = getControllerNodeType(nodeName);
   const ControllerNode = new NodeBuilder(typeName);
   ControllerNode.setName(nodeName);
-  console.log("ControllerNodeFactory", controller);
   const addedFields = new Set<string>();
   controller.advancedFields.forEach((field) => {
     console.log(field);

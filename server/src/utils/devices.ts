@@ -2,7 +2,6 @@ import WebSocket from "ws";
 import { database } from "./db.js";
 import { pubsub, DEVICES_UPDATED } from "./pubsub.js";
 import { ILightState } from "../interfaces/ILight.js";
-import { IEnum } from "../interfaces/IEnum.js";
 import { flowService } from "../services/FlowService.js";
 import { e_FieldType } from "../interfaces/IController.js";
 
@@ -48,10 +47,10 @@ wss.on("connection", function connection(ws, req) {
       const timestampTime = timeStamp.getTime();
       const now = new Date().getTime();
       if (now - timestampTime > 4000) {
-        console.log("terminating");
+        // console.log("terminating");
         allDevices = allDevices.filter((device) => device.id !== id);
         pubsub.publish(DEVICES_UPDATED, { devicesUpdated: allDevices });
-        console.log("publishing");
+        // console.log("publishing");
         ws.terminate();
         clearInterval(interval);
       }
@@ -59,12 +58,11 @@ wss.on("connection", function connection(ws, req) {
   }, 2000);
 
   ws.on("ping", function () {
-    console.log("ping");
     timeStamp = new Date();
   });
 
   ws.on("message", function incoming(message) {
-    console.log("received: %s", message);
+    // console.log("received: %s", message);
     if (message === "noheartbeat") {
       noHeartbeat = true;
       return;
@@ -78,7 +76,6 @@ wss.on("connection", function connection(ws, req) {
       .value();
     try {
       const data = JSON.parse(message.toString());
-      console.log("Recived data: %s", data);
       if (!controller) {
         console.log("No controller found");
         return;
@@ -127,7 +124,7 @@ Value: ${value} is outside the range: 0 - ${enumm.values.length - 1}`
       }
     } catch (e) {
       if (e instanceof SyntaxError) {
-        console.log("Received non-json string: %s", message);
+        // console.log("Received non-json string: %s", message);
       } else {
         throw e;
       }
@@ -141,11 +138,13 @@ wss.on("close", function close() {
 
 export async function sendState(deviceId: string, state: Partial<ILightState>) {
   const device = allDevices.find((device) => device.id === deviceId);
-  if (!device)
-    console.log(
-      `Could not update device with id "${deviceId}", as it seems to be offline`
-    );
-  if (device && device.ws && device.ws.readyState === WebSocket.OPEN) {
+  if (!device) {
+    // console.log(
+    //   `Could not update device with id "${deviceId}", as it seems to be offline`
+    // );
+    return;
+  }
+  if (device.ws && device.ws.readyState === WebSocket.OPEN) {
     if (!state) return;
     // TODO: Arduino cant deal with undefined values, so we need to send all values.
     device.ws.send(

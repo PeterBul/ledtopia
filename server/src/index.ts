@@ -25,6 +25,7 @@ import nanoid from "nanoid";
 import { IResolvers } from "graphql-tools";
 import { flowService } from "./services/FlowService.js";
 import { addControllerNodes } from "./flows/nodes/utils/addControllerNodes";
+import { reconcileFieldChanges } from "./utils/reconcileFieldChanges.js";
 
 const initialLightState = {
   mode: "SIMPLE",
@@ -521,8 +522,6 @@ const resolvers: IResolvers<
         })
         .write();
 
-      console.log(input);
-
       if (!light.deviceId) {
         sendState(oldLight.deviceId, { on: false });
       } else if (light.deviceId) {
@@ -614,11 +613,29 @@ const resolvers: IResolvers<
         })
         .write();
 
+      let isControllerRebuilt = false;
+
       if (oldController.controlMode !== controller.controlMode) {
         if (controller.controlMode === "ADVANCED") {
           flowService.addControllerNode(controller);
         } else if (oldController.controlMode === "ADVANCED") {
-          flowService.removeControllerNode(controller);
+          flowService.rebuildFlowsContainingController(controller);
+          isControllerRebuilt = true;
+        }
+      }
+
+      if (!isControllerRebuilt) {
+        const { addedFields, changedFields, removedFields } =
+          reconcileFieldChanges(
+            oldController.advancedFields,
+            controller.advancedFields
+          );
+        if (
+          addedFields.length > 0 ||
+          changedFields.length > 0 ||
+          removedFields.length > 0
+        ) {
+          flowService.rebuildFlowsContainingController(controller);
         }
       }
 

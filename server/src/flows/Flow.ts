@@ -24,14 +24,17 @@ export class Flow {
   engine: Engine;
   editor: Editor;
 
-  constructor(public name: string = "Unnamed", state: IState) {
+  constructor(public name: string = "Unnamed", public state: IState) {
     this.engine = new Engine(true);
     this.editor = new Editor();
+    this.init();
+  }
+
+  private init() {
     this.editor.use(this.engine);
     const allEnums = getAllEnums(database);
     const allControllers = getAllControllers(database);
-    // create new node
-    // add node to editor
+
     this.editor.registerNodeType("Clamp", ClampNode);
     addControllerNodes(
       ControllerNodeFactory,
@@ -47,20 +50,23 @@ export class Flow {
     addEnumNodes(SelectEnumNodeFactory, allEnums, this.editor);
     addEnumNodes(SwitchEnumNodeFactory, allEnums, this.editor);
 
-    this.editor.load(state);
-    console.log(`${this.name}: Root Nodes`, this.engine.rootNodes);
-    this.engine.events.calculated.addListener(this, (result) => {
-      // result is a Map<Node, any> with the key being a node instance and the value being what the node's calculate function returned
-      for (const v of result.values()) {
-        console.log("entry:", v);
-      }
-    });
+    this.editor.load(this.state);
+    console.log(
+      `New flow created: ${this.name}: Root Nodes`,
+      this.engine.rootNodes
+    );
 
     setTimeout(() => {
       this.editor.nodes
         .find((node) => node.type === "ColorNode")
         ?.setOptionValue(e_ColorNodeOption.Color, "#ff0000");
     }, 1000);
+  }
+
+  rebuildEditor() {
+    this.state = this.editor.save();
+    this.editor = new Editor();
+    this.init();
   }
 
   addNewControllerNode(controller: IController) {
@@ -71,13 +77,10 @@ export class Flow {
     }
   }
 
-  removeControllerNode(controller: IController) {
-    const node = this.editor.nodes.find(
+  hasControllerNode(controller: IController) {
+    return this.editor.nodes.some(
       (node) => node.type === getControllerNodeType(controller.name)
     );
-    if (node) {
-      this.editor.removeNode(node);
-    }
   }
 
   tokens: Set<TokenType> = new Set();
@@ -104,6 +107,7 @@ export class Flow {
     // TODO: Test if listeners are still active after loading a new state
     console.log("Load new state: ", state);
     this.editor.load(state);
+    this.state = state;
   }
 
   destroy() {

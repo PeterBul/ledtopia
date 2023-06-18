@@ -48,7 +48,7 @@ namespace e_FieldType {
   export type INTEGER = typeof e_FieldType.INTEGER;
 }
 
-interface ICustomField {
+export interface ICustomField {
   type: e_FieldType;
   name: string;
   value: string | null;
