@@ -1,3 +1,6 @@
+import { ID } from "./ID.js";
+import { e_ControlMode } from "./e_ControlMode.js";
+
 const e_LightType = {
   LED_STRIP: "LED_STRIP",
 } as const;
@@ -9,7 +12,10 @@ namespace e_LightType {
 }
 
 const e_BaseMode = {
+  SIMPLE: "SIMPLE",
   PULSE: "PULSE",
+  RAINBOW: "RAINBOW",
+  BOUNCE: "BOUNCE",
 } as const;
 
 type e_BaseMode = (typeof e_BaseMode)[keyof typeof e_BaseMode];
@@ -31,8 +37,21 @@ export interface ILightState {
 export interface ILight {
   id: string;
   name: string;
+  controlMode: e_ControlMode;
+  flowId: string;
   sceneId: string;
   deviceId: string;
+  type: e_LightType;
+  state: ILightState;
+}
+
+export interface ILightBuilt {
+  id: string;
+  name: string;
+  controlMode: e_ControlMode;
+  flow: ID | null;
+  scene: ID | null;
+  device: ID | null;
   type: e_LightType;
   state: ILightState;
 }

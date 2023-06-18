@@ -31,8 +31,7 @@ uint8_t MAX_BRIGHT = 255;
 
 uint8_t SPEED = 10;
 uint8_t COLOR_H = 60;
-uint8_t COLOR_S = 250;
-uint8_t COLOR_V = 100;
+uint8_t COLOR_S = 250;uint8_t COLOR_V = 100;
 uint8_t LIGHT_MODE = 0;
 
 float RAINBOW_SPEED = 10;
@@ -57,7 +56,7 @@ int led = 2;
 void setup()
 {
   // delay(10000);
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println(ssid);
   WiFi.begin(ssid, pass);
 
@@ -103,14 +102,13 @@ void setup()
 void loop()
 {
   webSocket.loop();
-  Serial.write("Hello from ESP8266");
-  delay(2000);
+  // delay(2000);
   // digitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)
   // delay(2000);               // wait for a second
   // digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
   // Serial.println("Works");
   // delay(1000);               // wait for a second
-
+  
   if (!IS_ON)
   {
     FastLED.clear();
@@ -135,6 +133,20 @@ void loop()
   }
 }
 
+void printLightValues()
+{
+  Serial.print("Is on: ");
+  Serial.print(IS_ON);
+  Serial.print(" Light mode: ");
+  Serial.print(LIGHT_MODE);
+  Serial.print(" H: ");
+  Serial.print(COLOR_H);
+  Serial.print(" S: ");
+  Serial.print(COLOR_S);
+  Serial.print(" V: ");
+  Serial.println(COLOR_V);
+}
+
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 {
   Serial.println(type);
@@ -147,13 +159,13 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
       Serial.println(str);
       DynamicJsonDocument state(200);
       deserializeJson(state, str);
-      IS_ON = state["on"];
-      LIGHT_MODE = state["mode"];
-      COLOR_H = state["hue"];
-      COLOR_S = state["saturation"];
-      COLOR_V = state["brightness"];
-      RAINBOW_SPEED = state["rainbowSpeed"];
-      PULSE_SPEED = state["pulseSpeed"];
+      IS_ON = state["o"];
+      LIGHT_MODE = state["m"];
+      COLOR_H = state["h"];
+      COLOR_S = state["s"];
+      COLOR_V = state["v"];
+      RAINBOW_SPEED = state["rs"];
+      PULSE_SPEED = state["ps"];
       break;
   }
 }

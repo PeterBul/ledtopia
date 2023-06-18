@@ -35,6 +35,42 @@
   dependencies:
     xss "^1.0.6"
 
+"@baklavajs/core@1.10.2", "@baklavajs/core@^1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/core/-/core-1.10.2.tgz#c61d14f7dffe6a2969eae6bc20891f348d759d31"
+  integrity sha512-8bqlhFJo9Zuli1DCIz41NK/eX6AAnyErKEBlamc8auEZMMlnusu8QkRuHxVXf+P7OsKKFTPHM5NGC4Ibhplbmg==
+  dependencies:
+    "@baklavajs/events" "^1.10.2"
+
+"@baklavajs/events@^1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/events/-/events-1.10.2.tgz#e24adb0b43dd3df961579174e004857829d19dfe"
+  integrity sha512-GtJdkEPdWN+NKxCTYhzpyLjAPyJLpx/hr4jASjNFtnoRFjwcHh/ZQAR5J7b/4hU0RTKjgAR/Oz71/Wlih4ry3Q==
+
+"@baklavajs/plugin-engine@1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-engine/-/plugin-engine-1.10.2.tgz#c40a9a64acef3d5522bbdce7e885e5d141a45ae4"
+  integrity sha512-kneDrfoqRq+hdHIxLNzkHh4YtU7CTzvg2lYmDne3NNCihPz+DUhu4mjq4Q+McRQrrG5WyqF9PFAyoBIibhQCFQ==
+  dependencies:
+    "@baklavajs/events" "^1.10.2"
+
+"@baklavajs/plugin-interface-types@1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-interface-types/-/plugin-interface-types-1.10.2.tgz#600a1b639931dc5516229cb435f93cf26b63f977"
+  integrity sha512-8hOsW7gxgZ7G9nOi1OtrsoeK7LTqXdlLXM8OG8/FR2A0OiwpS7eROfVxc2MX/bTY0K9ty1SnHVbC5jRnh1et5A==
+
+"@baklavajs/plugin-options-vue@1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-options-vue/-/plugin-options-vue-1.10.2.tgz#80e2f3309a35cf64f0443f2646fd26c91403b364"
+  integrity sha512-yaO5Cs0IaNB5r5FgQdGYQSAagyNsScLTkpz+lLwSidT1l0ZcKnM84e64iAPYFoZQhR8F9TkDWE8Hj69S9iraxQ==
+
+"@baklavajs/plugin-renderer-vue@1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@baklavajs/plugin-renderer-vue/-/plugin-renderer-vue-1.10.2.tgz#4ee5cd9056eb975a4f20750b78d26399eb58c20a"
+  integrity sha512-ehDZETbHegdLAcW7xIr8utqO5H2SK0Gd0XjnsDdT/zCnI5ilzmaQr05lfzLr01JJ+JEqrGJS5FujwTHOcXdpqA==
+  dependencies:
+    "@baklavajs/events" "^1.10.2"
+
 "@eslint-community/eslint-utils@^4.2.0":
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/@eslint-community/eslint-utils/-/eslint-utils-4.4.0.tgz#a23514e8fb9af1269d5f7788aa556798d61c6b59"
@@ -172,6 +208,11 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
+"@tsconfig/node16@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@tsconfig/node16/-/node16-1.0.4.tgz#0b92dcc0cc1c81f6f306a381f28e31b1a56536e9"
+  integrity sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==
+
 "@types/accepts@*", "@types/accepts@^1.3.5":
   version "1.3.5"
   resolved "https://registry.npmjs.org/@types/accepts/-/accepts-1.3.5.tgz"
@@ -196,6 +237,18 @@
     "@types/keyv" "*"
     "@types/node" "*"
     "@types/responselike" "*"
+
+"@types/color-convert@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@types/color-convert/-/color-convert-2.0.0.tgz#8f5ee6b9e863dcbee5703f5a517ffb13d3ea4e22"
+  integrity sha512-m7GG7IKKGuJUXvkZ1qqG3ChccdIM/qBBo913z+Xft0nKCX4hAU/IxKwZBU4cpRZ7GS5kV4vOblUkILtSShCPXQ==
+  dependencies:
+    "@types/color-name" "*"
+
+"@types/color-name@*":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
+  integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
 "@types/connect@*":
   version "3.4.33"
@@ -346,6 +399,13 @@
   version "2.0.3"
   resolved "https://registry.npmjs.org/@types/mime/-/mime-2.0.3.tgz"
   integrity sha512-Jus9s4CDbqwocc5pOAnh8ShfrnMcPHuJYzVcSUU7lrh8Ni5HuIqX3oilL86p3dlTrk0LzHRCgA/GQ7uNCw6l2Q==
+
+"@types/nanoid@^2.0.1":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@types/nanoid/-/nanoid-2.1.0.tgz#41edfda78986e9127d0dc14de982de766f994020"
+  integrity sha512-xdkn/oRTA0GSNPLIKZgHWqDTWZsVrieKomxJBOQUK9YDD+zfSgmwD5t4WJYra5S7XyhTw7tfvwznW+pFexaepQ==
+  dependencies:
+    "@types/node" "*"
 
 "@types/node-fetch@2.5.7":
   version "2.5.7"
@@ -781,6 +841,17 @@ backo2@^1.0.2:
   resolved "https://registry.npmjs.org/backo2/-/backo2-1.0.2.tgz"
   integrity sha1-MasayLEpNjRj41s+u2n038+6eUc=
 
+baklavajs@^1.10.2:
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/baklavajs/-/baklavajs-1.10.2.tgz#58b2afff0da30dab8e8ddf6b01a3b4dbc94ab74f"
+  integrity sha512-UWmh/L2BTUKpSZLPKZ6vzVrQ88FjqTcQGD4oJsSuUMOykWvsc+YJe8Ik/jxF7IrHV7Iqon7+UR0Ll7BhA8AJ9w==
+  dependencies:
+    "@baklavajs/core" "1.10.2"
+    "@baklavajs/plugin-engine" "1.10.2"
+    "@baklavajs/plugin-interface-types" "1.10.2"
+    "@baklavajs/plugin-options-vue" "1.10.2"
+    "@baklavajs/plugin-renderer-vue" "1.10.2"
+
 balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/balanced-match/-/balanced-match-1.0.0.tgz"
@@ -902,7 +973,7 @@ clone-response@^1.0.2:
 
 color-convert@^2.0.1:
   version "2.0.1"
-  resolved "https://registry.npmjs.org/color-convert/-/color-convert-2.0.1.tgz"
+  resolved "https://registry.yarnpkg.com/color-convert/-/color-convert-2.0.1.tgz#72d3a68d598c9bdb3af2ad1e84f21d896abd4de3"
   integrity sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==
   dependencies:
     color-name "~1.1.4"
@@ -1960,7 +2031,7 @@ ms@2.1.2, ms@^2.1.1:
 
 nanoid@^2.1.0, nanoid@^2.1.11:
   version "2.1.11"
-  resolved "https://registry.npmjs.org/nanoid/-/nanoid-2.1.11.tgz"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-2.1.11.tgz#ec24b8a758d591561531b4176a01e3ab4f0f0280"
   integrity sha512-s/snB+WGm6uwi0WjsZdaVcuf3KJXlfGl2LcxgwkEwJF0D/BWzVWAZW/XY4bFaiR7s0Jk3FPvlnepg1H1b1UwlA==
 
 natural-compare-lite@^1.4.0:

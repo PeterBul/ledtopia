@@ -85,6 +85,7 @@ void setup() {
 
 void loop() {
   recvBytes();
+  sendState();
   //recvWithStartEndMarkers();
   //showNewData();
   /*
@@ -143,6 +144,24 @@ void loop() {
     case 3:
       bounce();
       break;
+  }
+}
+
+int state = 0;
+int cp = 0;
+
+void sendState()
+{
+  if (millis() - cp > 4000)
+  {
+    DynamicJsonDocument doc(200);
+    doc["State"] = state;
+    state = (state + 1) % 5;
+    char data[200];
+    serializeJson(doc, data);
+    mySerial.write(data);
+    mySerial.write("\n");
+    cp = millis();
   }
 }
 

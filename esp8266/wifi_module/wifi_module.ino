@@ -21,6 +21,7 @@ bool isReceivedOk = true;
 void setup()
 {
   Serial.begin(115200);
+  Serial.setRxBufferSize(256);
   //Serial.write(ssid);
   WiFi.begin(ssid, pass);
   // connection with timeout
@@ -44,7 +45,7 @@ unsigned long lastMillis = 0;
 void loop()
 {
   webSocket.loop();
-  recvOk();
+  recvString();
   if (millis() - lastMillis > 50 && !isReceivedOk) {
     lastMillis = millis();
     writeByteArrayToSerial();
@@ -63,6 +64,35 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
   }
 }
 
+const unsigned int MAX_MESSAGE_LENGTH = 256;
+
+void recvString() {
+  while (Serial.available() > 0) {
+    static char message[MAX_MESSAGE_LENGTH];
+    static unsigned int message_pos = 0;
+    char inChar = Serial.read();
+
+    if ((message_pos >= MAX_MESSAGE_LENGTH - 1)) {
+      message_pos = 0;
+    } else if (inChar != '\n') {
+      message[message_pos] = inChar;
+      message_pos++;
+
+      if (message_pos >= MAX_MESSAGE_LENGTH) {
+        message_pos = MAX_MESSAGE_LENGTH - 1;
+      }
+    } else {
+      if (message[0] == rnd) {
+        isReceivedOk = true;
+        return;
+      }
+      message[message_pos] = '\0'; 
+      message_pos = 0;
+      webSocket.sendTXT(message);
+    }
+
+  }
+}
 
 
 void recvOk() {

@@ -15,9 +15,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@baklavajs/core": "^1.10.2",
     "apollo-server": "^2.19.0",
     "apollo-server-express": "^2.19.0",
     "arpscan": "^1.0.2",
+    "baklavajs": "^1.10.2",
+    "color-convert": "^2.0.1",
     "express": "^4.17.1",
     "graphql": "^15.4.0",
     "graphql-type-json": "^0.3.2",
@@ -29,7 +32,10 @@
     "ws": "^6.2.1"
   },
   "devDependencies": {
+    "@tsconfig/node16": "^1.0.4",
+    "@types/color-convert": "^2.0.0",
     "@types/lowdb": "^1.0.11",
+    "@types/nanoid": "^2.0.1",
     "@types/node": "^20.2.5",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "eslint": "^8.36.0",

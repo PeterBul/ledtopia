@@ -1,6 +1,6 @@
-import { ApolloServer, gql } from "apollo-server";
+import { ApolloServer, PubSub, gql } from "apollo-server";
 import GraphQLJSON from "graphql-type-json";
-import { database } from "./utils/db.js";
+import { IDatabase, database, flows } from "./utils/db.js";
 import { sendState, allDevices } from "./utils/devices.js";
 import {
   pubsub,
@@ -23,6 +23,8 @@ import {
 
 import nanoid from "nanoid";
 import { IResolvers } from "graphql-tools";
+import { flowService } from "./services/FlowService.js";
+import { addControllerNodes } from "./flows/nodes/utils/addControllerNodes";
 
 const initialLightState = {
   mode: "SIMPLE",
@@ -229,7 +231,11 @@ const typeDefs = gql`
   }
 `;
 
-const resolvers: IResolvers = {
+const resolvers: IResolvers<
+  any,
+  { db: IDatabase; pubsub: PubSub; resolvers: any }
+> = {
+  // @ts-ignore
   JSON: GraphQLJSON,
   Subscription: {
     sceneAdded: {
@@ -398,11 +404,19 @@ const resolvers: IResolvers = {
         })
         .write();
 
-      if (id) {
-        sendState(id, { ...initialLightState, ...input.state });
+      if (input.deviceId) {
+        // TODO: Check if this still works properly after changing from id to deviceId
+        sendState(input.deviceId, { ...initialLightState, ...input.state });
       }
 
       const light = db.get("lights").find({ id }).value();
+
+      if (light.flowId && light.deviceId) {
+        const flow = db.get("flows").find({ id: light.flowId }).value();
+        if (flow) {
+          flowService.subscribeLight(light.id, light.flowId);
+        }
+      }
 
       pubsub.publish(LIGHT_ADDED, { lightAdded: light });
 
@@ -441,6 +455,10 @@ const resolvers: IResolvers = {
 
       const controller = db.get("controllers").find({ id }).value();
 
+      if (controller.controlMode === "ADVANCED") {
+        flowService.addControllerNode(controller);
+      }
+
       pubsub.publish(CONTROLLER_ADDED, { controllerAdded: controller });
 
       return controller;
@@ -458,6 +476,10 @@ const resolvers: IResolvers = {
 
       const flow = db.get("flows").find({ id }).value();
 
+      if (flow.data) {
+        flowService.addFlow(id, flow.name, flow.data);
+      }
+
       pubsub.publish(FLOW_ADDED, { flowAdded: flow });
 
       return flow;
@@ -470,6 +492,8 @@ const resolvers: IResolvers = {
         sendState(light.deviceId, { on: false });
       }
 
+      flowService.unsubscribeLight(args.id, light.flowId);
+
       pubsub.publish(LIGHT_REMOVED, { lightRemoved: args.id });
 
       db.get("lights").remove({ id: args.id }).write();
@@ -478,6 +502,8 @@ const resolvers: IResolvers = {
 
     removeFlow: async (root, args, { db, pubsub }) => {
       db.get("flows").remove({ id: args.id }).write();
+
+      flowService.removeFlow(args.id);
 
       pubsub.publish(FLOW_REMOVED, { flowRemoved: args.id });
 
@@ -503,6 +529,16 @@ const resolvers: IResolvers = {
         sendState(light.deviceId, light.state);
       }
 
+      if (input.flowId || input.deviceId) {
+        flowService.unsubscribeLight(light.id, oldLight.flowId);
+      }
+      if (light.flowId && light.deviceId) {
+        const flow = db.get("flows").find({ id: light.flowId }).value();
+        if (flow) {
+          flowService.subscribeLight(light.id, light.flowId);
+        }
+      }
+
       pubsub.publish(LIGHT_UPDATED, { lightUpdated: light });
 
       return light;
@@ -516,6 +552,14 @@ const resolvers: IResolvers = {
       };
       console.log("newFlow", newFlow);
       const flow = db.get("flows").find({ id }).assign(newFlow).write();
+
+      if (input.data && flow.data) {
+        flowService.updateFlow(id, flow.data);
+      } else if (input.data && !flow.data) {
+        flowService.addFlow(id, flow.name, flow.data);
+      } else if (input.data === null && flow.data) {
+        flowService.removeFlow(id);
+      }
 
       pubsub.publish(FLOW_UPDATED, { flowUpdated: flow });
 
@@ -569,6 +613,14 @@ const resolvers: IResolvers = {
           ],
         })
         .write();
+
+      if (oldController.controlMode !== controller.controlMode) {
+        if (controller.controlMode === "ADVANCED") {
+          flowService.addControllerNode(controller);
+        } else if (oldController.controlMode === "ADVANCED") {
+          flowService.removeControllerNode(controller);
+        }
+      }
 
       pubsub.publish(CONTROLLER_UPDATED, { controllerUpdated: controller });
       return controller;
