@@ -84,6 +84,7 @@ void recvString() {
     } else {
       if (message[0] == rnd) {
         isReceivedOk = true;
+        message_pos = 0;
         return;
       }
       message[message_pos] = '\0'; 
