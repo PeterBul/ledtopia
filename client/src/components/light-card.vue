@@ -61,13 +61,12 @@
       </core-tabs>
     </core-box>
 
+    <device-selector
+      :device="light.device"
+      :allDevices="allDevices"
+      @select-device="handleSelectDevice"
+    ></device-selector>
     <div v-if="light.controlMode === 'SIMPLE'">
-      <device-selector
-        :device="light.device"
-        :allDevices="allDevices"
-        @select-device="handleSelectDevice"
-      ></device-selector>
-
       <simple-color-settings
         :state="light.state"
         @mode-change="handleModeChange"
