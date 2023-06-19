@@ -522,6 +522,8 @@ const resolvers: IResolvers<
         })
         .write();
 
+      // console.log(input);
+
       if (!light.deviceId) {
         sendState(oldLight.deviceId, { on: false });
       } else if (light.deviceId) {
@@ -622,6 +624,11 @@ const resolvers: IResolvers<
           flowService.rebuildFlowsContainingController(controller);
           isControllerRebuilt = true;
         }
+      }
+
+      if (oldController.name !== controller.name) {
+        flowService.rebuildFlowsContainingController(controller);
+        isControllerRebuilt = true;
       }
 
       if (!isControllerRebuilt) {

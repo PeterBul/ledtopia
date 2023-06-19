@@ -1,6 +1,10 @@
 <template>
   <details class="list-card">
-    <summary>
+    <summary
+      @keyup="($event) => isEditingName && $event.preventDefault()"
+      @click="preventToggleDetailsOnButton"
+      @keyup.enter="preventToggleDetailsOnButton"
+    >
       <core-flex align-items="center" justify-content="between">
         <core-flex align-items="center" justify-content="start">
           <div
@@ -13,10 +17,28 @@
             }"
           ></div>
 
-          <core-text size="lg">{{ controller.name || "Device" }}</core-text>
+          <input
+            ref="name"
+            class="text-input"
+            v-if="isEditingName"
+            v-model="tempName"
+            @blur="handleDoneEditingClick"
+            @keyup.esc="handleCancelEditingClick"
+          />
+          <core-text v-else @click.prevent="handleEditClick" size="lg">{{
+            controller.name || "Device"
+          }}</core-text>
         </core-flex>
 
         <core-flex align-items="center" justify-content="end">
+          <div class="mx-md">
+            <EditSaveButtons
+              :isEditing="isEditingName"
+              @done="handleDoneEditingClick"
+              @edit="handleEditClick"
+              @cancel="handleCancelEditingClick"
+            ></EditSaveButtons>
+          </div>
           <core-toggle
             :checked="controller.simpleState.on"
             @click.prevent
@@ -100,6 +122,7 @@ import {
   isControlMode,
 } from "@/interfaces/IController";
 import { e_BaseMode } from "@/interfaces/ILight";
+import EditSaveButtons from "@/components/edit-save-buttons.vue";
 
 export default defineComponent({
   props: {
@@ -108,8 +131,38 @@ export default defineComponent({
     updateController: Function as PropType<IUpdateController>,
     removeController: Function as PropType<IRemoveController>,
   },
-  components: { ControllerFields, SimpleColorSettings, DeviceSelector },
+  components: {
+    ControllerFields,
+    SimpleColorSettings,
+    DeviceSelector,
+    EditSaveButtons,
+  },
+  data() {
+    return {
+      isEditingName: false,
+      tempName: "",
+    };
+  },
   methods: {
+    handleEditClick() {
+      this.isEditingName = true;
+      this.tempName = this.controller.name || "";
+      this.$nextTick(() => {
+        (this.$refs.name as HTMLInputElement).focus();
+      });
+    },
+    handleCancelEditingClick(e: KeyboardEvent) {
+      e.preventDefault();
+      this.isEditingName = false;
+    },
+    handleDoneEditingClick(e: FocusEvent) {
+      e.preventDefault();
+      if (!this.updateController || !this.controller) return;
+      this.updateController(this.controller.id, {
+        name: this.tempName,
+      });
+      this.isEditingName = false;
+    },
     handleRemoveController(e: Event) {
       e.preventDefault();
       if (!this.controller || !this.removeController) {
@@ -189,6 +242,11 @@ export default defineComponent({
       this.updateController(this.controller.id, {
         controlMode: e.target?.value,
       });
+    },
+    preventToggleDetailsOnButton(e: Event) {
+      if (document?.activeElement?.nodeName.toLowerCase().includes("button")) {
+        e.preventDefault();
+      }
     },
     isControlMode,
   },

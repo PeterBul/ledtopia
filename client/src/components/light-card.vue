@@ -1,6 +1,10 @@
 <template>
   <details class="list-card">
-    <summary>
+    <summary
+      @keyup="($event) => isEditingName && $event.preventDefault()"
+      @click="preventToggleDetailsOnButton"
+      @keyup.enter="preventToggleDetailsOnButton"
+    >
       <core-flex align-items="center" justify-content="between">
         <core-flex align-items="center" justify-content="start">
           <div
@@ -13,10 +17,28 @@
             }"
           ></div>
 
-          <core-text size="lg">{{ light.name || "Device" }}</core-text>
+          <input
+            ref="name"
+            class="text-input"
+            v-if="isEditingName"
+            v-model="tempName"
+            @blur="handleDoneEditingClick"
+            @keyup.esc="handleCancelEditingClick"
+          />
+          <core-text @click.prevent="handleEditClick" v-else size="lg">{{
+            light.name || "Device"
+          }}</core-text>
         </core-flex>
 
         <core-flex align-items="center" justify-content="end">
+          <div class="mx-md">
+            <EditSaveButtons
+              :isEditing="isEditingName"
+              @done="handleDoneEditingClick"
+              @edit="handleEditClick"
+              @cancel="handleCancelEditingClick"
+            ></EditSaveButtons>
+          </div>
           <core-toggle
             :checked="light.state.on"
             @click.prevent
@@ -99,13 +121,14 @@ import {
   updateMode,
 } from "../utils/lights";
 import DeviceSelector from "./device-selector.vue";
-import { PropType } from "vue";
+import { PropType, defineComponent } from "vue";
 import { ILight, IRemoveLight, IUpdateLight } from "@/interfaces/ILight";
 import { isControlMode } from "@/interfaces/IController";
 import FlowSelector from "./flow-selector.vue";
 import { IFlow } from "@/interfaces/IFlow";
+import EditSaveButtons from "@/components/edit-save-buttons.vue";
 
-export default {
+export default defineComponent({
   props: {
     copyLight: Function,
     allDevices: Array,
@@ -114,7 +137,12 @@ export default {
     removeLight: { type: Function as PropType<IRemoveLight>, required: true },
     allFlows: { type: Array as PropType<IFlow[]>, required: true },
   },
-  components: { SimpleColorSettings, DeviceSelector, FlowSelector },
+  components: {
+    SimpleColorSettings,
+    DeviceSelector,
+    FlowSelector,
+    EditSaveButtons,
+  },
   // computed: {
   //   deviceOptions() {
   //     const lightDeviceId = this.light.device?.id;
@@ -137,7 +165,31 @@ export default {
   //     return [...otherDevices, { ...light }];
   //   },
   // },
+  data() {
+    return {
+      isEditingName: false,
+      tempName: "",
+    };
+  },
   methods: {
+    handleEditClick() {
+      this.tempName = this.light.name;
+      this.isEditingName = true;
+      this.$nextTick(() => {
+        (this.$refs.name as HTMLInputElement).focus();
+      });
+    },
+    handleCancelEditingClick(e: KeyboardEvent) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      this.isEditingName = false;
+    },
+    handleDoneEditingClick(e: FocusEvent) {
+      if (e.defaultPrevented) return;
+      e.preventDefault();
+      this.updateLight(this.light.id, { name: this.tempName });
+      this.isEditingName = false;
+    },
     handleSelectDevice(deviceId: string) {
       if (deviceId === "none") {
         this.updateLight(this.light.id, {
@@ -190,6 +242,11 @@ export default {
       if (!isControlMode(e.target.value)) return;
       this.updateLight(this.light.id, { controlMode: e.target.value });
     },
+    preventToggleDetailsOnButton(e: Event) {
+      if (document?.activeElement?.nodeName.toLowerCase().includes("button")) {
+        e.preventDefault();
+      }
+    },
   },
-};
+});
 </script>

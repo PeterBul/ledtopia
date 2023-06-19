@@ -47,7 +47,7 @@ wss.on("connection", function connection(ws, req) {
       const timestampTime = timeStamp.getTime();
       const now = new Date().getTime();
       if (now - timestampTime > 4000) {
-        // console.log("terminating");
+        console.log(`terminating ${ip}`);
         allDevices = allDevices.filter((device) => device.id !== id);
         pubsub.publish(DEVICES_UPDATED, { devicesUpdated: allDevices });
         // console.log("publishing");

@@ -217,6 +217,16 @@ input[type="range"] {
   margin-right: var(--core-space-xxs);
 }
 
+.mx-sm {
+  margin-left: var(--core-space-sm);
+  margin-right: var(--core-space-sm);
+}
+
+.mx-md {
+  margin-left: var(--core-space-md);
+  margin-right: var(--core-space-md);
+}
+
 .mb-md {
   margin-bottom: var(--core-space-md);
 }
