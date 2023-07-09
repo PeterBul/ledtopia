@@ -17,7 +17,7 @@ WebSocketsClient webSocket;
 #define LED_CK 11        // Clock pin for WS2801 or APA102
 #define COLOR_ORDER GRB  // It's GRB for WS2812B and GBR for APA102
 #define LED_TYPE WS2812B // changed toB What kind of strip are you using (APA102, WS2801 or WS2812B)?
-#define NUM_LEDS 60      // Number of LED's
+#define NUM_LEDS 200      // Number of LED's
 
 // Constant for ball effect
 #define GRAVITY -1 // Downward (negative) acceleration of gravity in m/s^2
@@ -30,13 +30,14 @@ bool IS_ON = true;
 uint8_t MAX_BRIGHT = 255;
 
 uint8_t SPEED = 10;
-uint8_t COLOR_H = 60;
-uint8_t COLOR_S = 250;uint8_t COLOR_V = 100;
-uint8_t LIGHT_MODE = 0;
+uint8_t COLOR_H = 245;
+uint8_t COLOR_S = 250;
+uint8_t COLOR_V = 100;
+uint8_t LIGHT_MODE = 1;
 
 float RAINBOW_SPEED = 10;
 
-float PULSE_SPEED = 300;
+float PULSE_SPEED = 290;
 float MIN_PULSE_BRIGHT = 100; 
 float MAX_PULSE_BRIGHT = 255;
 
