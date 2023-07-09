@@ -55,12 +55,6 @@ export class Flow {
       `New flow created: ${this.name}: Root Nodes`,
       this.engine.rootNodes
     );
-
-    setTimeout(() => {
-      this.editor.nodes
-        .find((node) => node.type === "ColorNode")
-        ?.setOptionValue(e_ColorNodeOption.Color, "#ff0000");
-    }, 1000);
   }
 
   rebuildEditor() {

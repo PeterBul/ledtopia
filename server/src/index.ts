@@ -493,7 +493,7 @@ const resolvers: IResolvers<
         sendState(light.deviceId, { on: false });
       }
 
-      flowService.unsubscribeLight(args.id, light.flowId);
+      flowService.unsubscribeLight(args.id);
 
       pubsub.publish(LIGHT_REMOVED, { lightRemoved: args.id });
 
@@ -530,10 +530,10 @@ const resolvers: IResolvers<
         sendState(light.deviceId, light.state);
       }
 
-      if (input.flowId || input.deviceId) {
-        flowService.unsubscribeLight(light.id, oldLight.flowId);
+      if (light.controlMode !== "ADVANCED" || input.flowId || input.deviceId) {
+        flowService.unsubscribeLight(light.id);
       }
-      if (light.flowId && light.deviceId) {
+      if (light.controlMode === "ADVANCED" && light.flowId && light.deviceId) {
         const flow = db.get("flows").find({ id: light.flowId }).value();
         if (flow) {
           flowService.subscribeLight(light.id, light.flowId);

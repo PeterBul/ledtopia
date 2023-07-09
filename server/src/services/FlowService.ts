@@ -79,6 +79,7 @@ class FlowService {
         rainbowSpeed: nullToUndefined(output.rainbowSpeed) ?? 100,
       });
     });
+    this.flows[flowId].engine.calculate();
   }
 
   unsubscribeLight(lightId: string, flowId?: string) {

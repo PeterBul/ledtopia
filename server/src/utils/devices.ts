@@ -22,7 +22,7 @@ const modeMap = {
   BOUNCE: 3,
 };
 
-let interval: NodeJS.Timer;
+const intervals = new Set<NodeJS.Timer>();
 
 wss.on("connection", function connection(ws, req) {
   const id = req.socket.remoteAddress?.replace("::ffff:", "");
@@ -42,27 +42,28 @@ wss.on("connection", function connection(ws, req) {
   let timeStamp = new Date();
   let noHeartbeat = false;
 
-  interval = setInterval(() => {
+  const interval = setInterval(() => {
     if (!noHeartbeat) {
       const timestampTime = timeStamp.getTime();
       const now = new Date().getTime();
       if (now - timestampTime > 4000) {
+        clearInterval(interval);
+        intervals.delete(interval);
         console.log(`terminating ${ip}`);
         allDevices = allDevices.filter((device) => device.id !== id);
         pubsub.publish(DEVICES_UPDATED, { devicesUpdated: allDevices });
-        // console.log("publishing");
         ws.terminate();
-        clearInterval(interval);
       }
     }
   }, 2000);
+  intervals.add(interval);
 
   ws.on("ping", function () {
     timeStamp = new Date();
   });
 
   ws.on("message", function incoming(message) {
-    // console.log("received: %s", message);
+    console.log("received: %s", message);
     if (message === "noheartbeat") {
       noHeartbeat = true;
       return;
@@ -133,7 +134,7 @@ Value: ${value} is outside the range: 0 - ${enumm.values.length - 1}`
 });
 
 wss.on("close", function close() {
-  clearInterval(interval);
+  intervals.forEach((interval) => clearInterval(interval));
 });
 
 export async function sendState(deviceId: string, state: Partial<ILightState>) {
